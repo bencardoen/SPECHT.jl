@@ -1,0 +1,5 @@
+language: julia
+os:
+  - linux
+julia:
+  - 1.6.2
