@@ -16,13 +16,13 @@ SPECHT is a Julia implementation of a contrastive weakly supervised object detec
 
 <a name="introduction"></a>
 ## Introduction
-Given 2 (or more) sets of images, each with a label, SPECHT detect objects adaptively & consistenly across datasets, and identifies how each object supports the image level label.
+Given 2 (or more) sets of images, each with a label, SPECHT detects objects adaptively & consistenly across datasets, and identifies how each object supports the image level label.
 
-In the below example, we want to identify in images with label **'X'**, which objects are typical of label 'Y', and which exclusively of 'X'.
+In the below example, we want to identify in images with label **'X'**, which objects are typical of label 'Y', and which are exclusively of 'X'.
 
 <img src="figures/exy.png" width="1024">
 
-Illustrated with Y featuring mostly faint, small objects, and X a mixture of both large & bright, as well as faint and dim.
+The above problem setup is illustrated with Y featuring mostly faint, small objects, and X a mixture of both large & bright, as well as faint and dim.
 
 <a name="installation"></a>
 ### Installation
