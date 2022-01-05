@@ -2,6 +2,7 @@
 
 SPECHT is a Julia implementation of a contrastive weakly supervised object detection and identification method for fluorescence microscopy.
 
+## Test results on Circle CI
 [![CircleCI](https://circleci.com/gh/bencardoen/SPECHT.jl/tree/main.svg?style=svg&circle-token=3ff67198cc4b24ba243ae4e90d9af8c4ecb6e6aa)](https://circleci.com/gh/bencardoen/SPECHT.jl/tree/main)
 
 # Table of contents
@@ -67,6 +68,8 @@ You should see something like this
 <a name="usage"></a>
 ## Usage
 
+**NOTE** 
+The below examples use a seeded random number generator, however, depending on the rder of execution and platform you may get different output images.
 
 In the below sections we'll walk through a few of these use cases with code examples.
 For the full API:
@@ -299,7 +302,7 @@ function label_image(cx, px)
 	res
 end
 cx = components[1]
-r, g = label_image(cx, p) for p in [px_to_y, px_to_x]
+r, g = [label_image(cx, p) for p in [px_to_y, px_to_x]]
 
 
 # Show the labelled image
