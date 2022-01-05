@@ -1,0 +1,11 @@
+version: 2
+jobs:
+  build:
+    working_directory: /root/project/SPECHT.jl   # Clone into a directory whose name matches your Package.
+    docker:
+      - image: julia:1.6                # image comes from Docker hub
+    steps:
+      - checkout
+      - run:
+          name: Install and Test this package
+          command: julia -e 'using Pkg; Pkg.update(); Pkg.clone(pwd()); Pkg.build("SPECHT"); Pkg.test("SPECHT");'
