@@ -632,7 +632,8 @@ end
 """
 	μ, med, σ, min, max of 1XN array
 """
-function describeimg(xs)
+function describeimg(_xs)
+	xs = Float64.(_xs) # Force promotion, Image types > 1.7 are warning for deprecation, and F64 is more accurate.
 	xs = xs[xs .> 0]
 	if length(xs) == 0
 		@debug "No data to compute statistics for"
