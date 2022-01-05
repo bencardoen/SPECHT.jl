@@ -1,4 +1,6 @@
-version: 2
+version: 2.1
+orbs:
+  codecov: codecov/codecov@3.0.0
 jobs:
   build:
     working_directory: /root/project/SPECHT.jl   # Clone into a directory whose name matches your Package.
@@ -9,3 +11,10 @@ jobs:
       - run:
           name: Install and Test this package
           command: julia -e 'using Pkg; Pkg.update(); Pkg.activate("."); Pkg.build("SPECHT"); Pkg.test("SPECHT");'
+      - codecov/upload
+
+
+workflows:
+  example-workflow:
+    jobs:
+      - build
