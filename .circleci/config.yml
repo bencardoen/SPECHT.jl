@@ -3,7 +3,6 @@ jobs:
   build:
     working_directory: /root/project/SPECHT.jl   # Clone into a directory whose name matches your Package.
     docker:
-      - image: julia:1.6                # image comes from Docker hub
       - image: julia:1.7
     steps:
       - checkout
