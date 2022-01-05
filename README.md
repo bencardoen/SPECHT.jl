@@ -438,7 +438,7 @@ sha256sum datasets.zip
 ```
 
 #### Code
-The scripts matching the processing for the paper can be found in ./src/scripts.
+The scripts matching the processing for the paper can be found in ./scripts.
 Note that each can have extra dependencies that are not necessary for SPECHT, but useful for e.g. visualization.
 
 You can install any missing packages by
