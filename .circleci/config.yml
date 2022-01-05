@@ -8,4 +8,4 @@ jobs:
       - checkout
       - run:
           name: Install and Test this package
-          command: julia -e 'using Pkg; Pkg.update(); Pkg.clone(pwd()); Pkg.build("SPECHT"); Pkg.test("SPECHT");'
+          command: julia -e 'using Pkg; Pkg.update(); Pkg.activate("."); Pkg.build("SPECHT"); Pkg.test("SPECHT");'
