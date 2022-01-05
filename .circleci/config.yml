@@ -10,6 +10,4 @@ jobs:
       - checkout
       - run:
           name: Install and Test this package
-          command: julia -e 'using Pkg; Pkg.update(); Pkg.activate("."); Pkg.build("SPECHT"); Pkg.test("SPECHT");'
-      - codecov/upload
-
+          command: julia -e 'using Pkg; Pkg.update(); Pkg.activate("."); Pkg.build("SPECHT"); Pkg.test("SPECHT", coverage=true); using Coverage; Codecov.submit(Codecov.process_folder())'
