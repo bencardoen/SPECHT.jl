@@ -302,7 +302,7 @@ function label_image(cx, px)
 	res
 end
 cx = components[1]
-r, g = label_image(cx, p) for p in [px_to_y, px_to_x]
+r, g = [label_image(cx, p) for p in [px_to_y, px_to_x]]
 
 
 # Show the labelled image
