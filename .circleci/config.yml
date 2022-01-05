@@ -13,8 +13,3 @@ jobs:
           command: julia -e 'using Pkg; Pkg.update(); Pkg.activate("."); Pkg.build("SPECHT"); Pkg.test("SPECHT");'
       - codecov/upload
 
-
-workflows:
-  example-workflow:
-    jobs:
-      - build
