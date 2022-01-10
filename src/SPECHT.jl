@@ -1650,7 +1650,7 @@ function filter_k(img, k, dropzeros=false, autotune=false, PRC=1.0)
 		th = μ * σ^k
 	else
 		@debug "Using arithmetic mean"
-    	μ, σ = Statistics.mean(_img), Statistics.std(_img)
+    	μ, σ = Statistics.mean(Float64.(_img)), Statistics.std(Float64.(_img))
 		th = μ + σ*k
 	end
     _img[_img .< th] .= z
