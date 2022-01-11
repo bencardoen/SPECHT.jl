@@ -422,7 +422,7 @@ If you find this repository of use, please cite
 ### Reproducibility section
 #### Data
 Datasets for the paper (including output) can be found [here](https://vault.sfu.ca/index.php/s/g71iRPTU1VZIRzO).
-Note that the data is licensed (with original providers' reserved rights superceding this license) under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+Note that the data is licensed (with original providers' reserved rights superceding this license) under [CC BY-NC-ND 4.00](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 If you wish to re-use the data, please contact us.
 
 ##### Checksum
