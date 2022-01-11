@@ -560,7 +560,7 @@ function quantify_c12_mito_overlap(c1c2_img, mito_img, raw_mito_img; pxmargin=0)
 			μ, σ = 0, 0
 		else
 			mito_under_spot = (mito_mask .*raw_mito_img)[C12 .> 0]
-			μ, σ = Statistics.mean(mito_under_spot), Statistics.std(mito_under_spot)
+			μ, σ = Statistics.mean(Float64.(mito_under_spot)), Statistics.std(Float64.(mito_under_spot))
 		end
 		result[nth, :] .= npx, μ, σ
 	end
