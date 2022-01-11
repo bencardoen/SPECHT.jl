@@ -415,10 +415,10 @@ using ImageFiltering
 		import Distributions
 		Random.seed!(42)
 		n = Distributions.Normal()
-		xs = rand(n, 100)
-		xs[90:100] .= 5
+		xs = abs.(rand(n, 100))
+		xs[90:100] .*= 5
 		scaled = scale(xs)
-		xs[50:100] .= 5
+		xs[90:100] .*= 5
 		scaled1 = scale(xs)
 		@test scaled1 > scaled
 	end
