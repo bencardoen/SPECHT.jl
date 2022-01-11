@@ -407,6 +407,12 @@ using ImageFiltering
 		rm(tmp, recursive=true)
 	end
 
+	@testset "scale" begin
+		Random.seed!(42)
+		xs = rand(100)
+		scaled = scale(xs)
+		@test scale != 0
+	end
 
 	@testset "process_cell" begin
 		# function process_cell(qpath, channels, outdir, serie, subdir, ct, experiment, z, selfscale, celln, SQR; maxspotsize=Inf64, segment=false, sigmas=[3,3])
