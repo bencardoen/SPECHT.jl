@@ -7,7 +7,5 @@ jobs:
     docker:
       - image: julia:1.7
     steps:
-      - checkout
       - run:
-          name: Install and Test this package
-          command: julia -e 'using Pkg; Pkg.update(); Pkg.activate("."); Pkg.build("SPECHT"); Pkg.test("SPECHT", coverage=true); using Coverage; Codecov.submit(Codecov.process_folder())'
+          command: apt-get install -y git-all
