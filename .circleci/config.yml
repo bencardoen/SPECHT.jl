@@ -8,4 +8,4 @@ jobs:
       - image: julia:1.7
     steps:
       - run:
-          command: julia -e 'using Pkg; Pkg.add("Coverage"); Pkg.add(url="https://github.com/bencardoen/ERGO.jl.git"); Pkg.add(url="https://github.com/bencardoen/SPECHT.jl.git"); Pkg.test("SPECHT", coverage=true); using Coverage; Codecov.submit(Codecov.process_folder())'
+          command: julia -e 'using Pkg; Pkg.add("Coverage"); Pkg.add(url="https://github.com/bencardoen/ERGO.jl.git"); Pkg.add(url="https://github.com/bencardoen/SPECHT.jl.git"); Pkg.test("SPECHT")'
