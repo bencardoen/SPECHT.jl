@@ -726,7 +726,7 @@ end
 	For a 3 channel cell, where results are stored in dict res, compute statistics based on 3x 2D masks.
 """
 function quantify_spots_mitophagy(res)
-	@error "DEPRECATED"
+	@warn "DEPRECATED"
     _, mask_mito = res[0]
     cc1, mask_1 = res[1]
     cc2, mask_2 = res[2]
@@ -1443,22 +1443,22 @@ function validatechannels(path)
 	fst = dims[1]
 	for d in dims[2:end]
 		if length(d) != 2
-			@error "Invalid image dimensions, aborting"
+			@warn "Invalid image dimensions, aborting"
 			return nothing
 		end
 		if d != fst
-			@error "Invalid image dimensions, aborting"
+			@warn "Invalid image dimensions, aborting"
 			return nothing
 		end
 	end
 	types = [eltype(i) for i in images]
 	if ! all(x->x==types[1], types)
-		@error "Invalid image types $(types), aborting"
+		@warn "Invalid image types $(types), aborting"
 		return nothing
 	end
 	for t in types
 		if !(t == Images.Gray{Images.N0f8}) | (t == Images.Gray{Images.N0f16})
-			@error "Invalid image types $(t), aborting"
+			@warn "Invalid image types $(t), aborting"
 			return nothing
 		end
 	end
@@ -1473,7 +1473,7 @@ function validatechannels(path)
 		return [ERGO.aszero(images[1]), images[1], images[2]]
 		# return vcat([mito, images...])
 	end
-	@error "Invalid number of images $(channelnrs) != 2,3"
+	@warn "Invalid number of images $(channelnrs) != 2,3"
 	return nothing
 end
 

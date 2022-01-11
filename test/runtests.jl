@@ -411,7 +411,16 @@ using ImageFiltering
 		Random.seed!(42)
 		xs = rand(100)
 		scaled = scale(xs)
-		@test scale != 0
+		@test scaled == 0.0
+		import Distributions
+		Random.seed!(42)
+		n = Distributions.Normal()
+		xs = rand(n, 100)
+		xs[90:100] .= 5
+		scaled = scale(xs)
+		xs[50:100] .= 5
+		scaled1 = scale(xs)
+		@test scaled1 > scaled
 	end
 
 	@testset "process_cell" begin
@@ -511,6 +520,14 @@ using ImageFiltering
             ikz, thz = filter_k(img, 1, true)
             @test isapprox(thz, th, atol=0.02)
         end
+        Random.seed!(42)
+		n = Distributions.Normal()
+        img = abs.(0.5 .+ rand(n, 100, 100))
+		img[20:30] .*= 2
+		img[40:60] .*= 4
+        ikz, thz1 = filter_k(img, 1, true, true, 1.0)
+		ikz, thz2 = filter_k(img, 1, true, true, 2.0)
+		@test thz2 < thz1
     end
 
     @testset "hm" begin
