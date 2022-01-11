@@ -8,4 +8,4 @@ jobs:
       - image: julia:1.7
     steps:
       - run:
-          command: apt-get install -y git-all
+          command: apt-get install -y git
