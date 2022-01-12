@@ -535,6 +535,26 @@ function sandp(grade, img)
 	return IQ, ps
 end
 
+"""
+	zeta(N, z)
+
+	Compute up to N terms the z'th zeta function.
+"""
+function zeta(N, z)
+    sum(1/i^z for i in 1:N)
+end
+
+"""
+	aperyapprox(N)
+
+	Approximate the Apery constant with up to N terms.
+	Note: naive implementation, faster ones exist.
+	Used in versioning SPECHT
+"""
+function aperyapprox(N)
+	return zeta(N, 3)
+end
+
 
 """
 	quantify_c12_mito_overlap(C12mask, mitomask, raw_mito_img; pxmargin)
