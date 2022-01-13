@@ -72,18 +72,23 @@ You should see something like this
 ### Singularity
 You can also run SPECHT in a pre-installed [Singularity](https://singularity-docs.readthedocs.io) container.
 
-The container is a curated installation of Fedora 35 with Julia 1.7.1 and the latest version SPECHT.
+The container is a curated installation of Fedora 35 with Julia 1.7.1 and the latest version SPECHT, saving you the steps from installing it locally.
 
-Advantages are: 'build once, run anywhere', and reproducibility, as well as making deployment to cluster computing centers easier.
+Advantages are: 
+* build once, run anywhere (portable)
+* reproducibility
+* runs on computing clusters as-is
 
 Get the container
 ```bash
 singularity pull library://bcvcsert/default/specht_f35:0.0.1
 ```
-Or if you prefer a rebuild
+Or if you prefer a rebuild (assumes you have sudo rights)
 ```bash
 sudo singularity build specht.sif singularity.def
 ```
+Note, the build may fail the 2nd test step, this is because Julia expects a writable filesystem. However, in the definition file we clearly run the tests as the last step of the postscript. The tests themselves do not fail. If you're unsure, you can run the tests again with a writable container.
+
 Optionally test the container
 ```bash
 singularity test --writable specht.sif
