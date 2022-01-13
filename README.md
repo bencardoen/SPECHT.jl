@@ -88,6 +88,8 @@ Or if you prefer a rebuild (assumes you have sudo rights)
 sudo singularity build specht.sif singularity.def
 ```
 
+The last step of the build process executes all tests to ensure the container image functions as intended.
+
 Then you can login in an interactive shell
 ```bash
 singularity shell specht_f35_0.0.1.sif
@@ -96,10 +98,13 @@ singularity shell specht_f35_0.0.1.sif
 Now you can interact with the container installation as shown below
 ```bash
 Singularity>
-Singularity> julia --history=no # Container is read only
+Singularity> julia
 julia> using SPECHT;
 julia> .... # your code here
 ```
+
+**Note**: Julia writes history and logs to $JULIA_DEPOT_PATH/logs. In the container that is a symbolic link to /dev/shm (temporary filesystem).
+Without this, you'd need to execute julia --history=no, and you'll need to enable --writable, which does not always work depending on your Singularity configuration.
 
 <a name="usage"></a>
 ## Usage
