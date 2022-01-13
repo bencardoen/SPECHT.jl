@@ -87,20 +87,16 @@ Or if you prefer a rebuild (assumes you have sudo rights)
 ```bash
 sudo singularity build specht.sif singularity.def
 ```
-Note, the build may fail the 2nd test step, this is because Julia expects a writable filesystem. However, in the definition file we clearly run the tests as the last step of the postscript. The tests themselves do not fail. If you're unsure, you can run the tests again with a writable container.
 
-Optionally test the container
-```bash
-singularity test --writable specht_f35_0.0.1.sif
-```
 Then you can login in an interactive shell
 ```bash
-singularity shell --writable specht_f35_0.0.1.sif
+singularity shell specht_f35_0.0.1.sif
 ```
-Then you can interact with the container installation as shown below
+
+Now you can interact with the container installation as shown below
 ```bash
 Singularity>
-Singularity> julia
+Singularity> julia --history=no # Container is read only
 julia> using SPECHT;
 julia> .... # your code here
 ```
