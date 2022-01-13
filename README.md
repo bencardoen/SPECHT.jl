@@ -91,11 +91,11 @@ Note, the build may fail the 2nd test step, this is because Julia expects a writ
 
 Optionally test the container
 ```bash
-singularity test --writable specht.sif
+singularity test --writable specht_f35_0.0.1.sif
 ```
 Then you can login in an interactive shell
 ```bash
-singularity shell --writable specht.sif
+singularity shell --writable specht_f35_0.0.1.sif
 ```
 Then you can interact with the container installation as shown below
 ```bash
