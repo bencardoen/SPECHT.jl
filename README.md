@@ -10,6 +10,7 @@ SPECHT is a Julia implementation of a contrastive weakly supervised object detec
 # Table of contents
 1. [Introduction](#introduction)
 2. [Installation](#install)
+   1. [Singularity](#singularity)
 3. [Usage](#usage)
    1. [Object detection](#object)
    2. [Contrastive learning](#contrast)
@@ -67,10 +68,42 @@ You should see something like this
 
 ![Test output](figures/test.png)
 
+<a name="singularity"></a>
+### Singularity
+You can also run SPECHT in a pre-installed [Singularity](https://singularity-docs.readthedocs.io) container.
+
+The container is a curated installation of Fedora 35 with Julia 1.7.1 and the latest version SPECHT.
+
+Advantages are: 'build once, run anywhere', and reproducibility, as well as making deployment to cluster computing centers easier.
+
+Get the container
+```bash
+singularity pull library://bcvcsert/default/specht_f35:0.0.1
+```
+Or if you prefer a rebuild
+```bash
+sudo singularity build specht.sif singularity.def
+```
+Optionally test the container
+```bash
+singularity test --writable specht.sif
+```
+Then you can login in an interactive shell
+```bash
+singularity shell --writable specht.sif
+```
+Then you can interact with the container installation as shown below
+```bash
+Singularity>
+Singularity> julia
+julia> using SPECHT;
+julia> .... # your code here
+```
+
 <a name="usage"></a>
 ## Usage
 
-**NOTE** 
+**NOTE**
 The below examples use a seeded random number generator, however, depending on the rder of execution and platform you may get different output images.
 
 In the below sections we'll walk through a few of these use cases with code examples.

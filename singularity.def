@@ -1,0 +1,39 @@
+BootStrap: docker
+From: fedora:35
+
+%post
+    dnf install -y wget
+    wget https://julialang-s3.julialang.org/bin/linux/x64/1.7/julia-1.7.1-linux-x86_64.tar.gz
+    mkdir -p /opt/julia
+    mv julia-1.7.1-linux-x86_64.tar.gz /opt/julia
+    cd /opt/julia
+    tar -xf julia-1.7.1-linux-x86_64.tar.gz
+    mkdir -p /dev/shm/tmpx
+    cd /dev/shm/tmpx
+    echo $PATH
+    export PATH=/opt/julia/julia-1.7.1/bin:$PATH
+    mkdir -p /opt/juliadepot
+    export JULIA_DEPOT_PATH=/opt/juliadepot
+    julia -e 'using Pkg; Pkg.update(); Pkg.add(url="https://github.com/bencardoen/ERGO.jl"); Pkg.add(url="https://github.com/bencardoen/SPECHT.jl")'
+    julia -e 'using Pkg; Pkg.test("SPECHT")'
+
+%environment
+    export LC_ALL=C
+    export PATH=/opt/julia/julia-1.7.1/bin:$PATH
+    export JULIA_DEPOT_PATH=/opt/juliadepot
+
+
+%runscript
+    echo "Container was created $NOW"
+    echo "Arguments received: $*"
+    exec echo "$@"
+
+%labels
+    Author Ben Cardoen, bcardoen@sfu.ca
+    Version v0.0.1
+
+%help
+    This is a container to offer SPECHT without altering the local user environment, for testing purposes.
+    Usage (interactively):
+    singularity shell --writable specht.sif
+    julia
