@@ -3,19 +3,21 @@ From: fedora:35
 
 %post
     dnf install -y wget
+    dnf install -y openssh-clients
+    dnf install -y git
     wget https://julialang-s3.julialang.org/bin/linux/x64/1.7/julia-1.7.1-linux-x86_64.tar.gz
     mkdir -p /opt/julia
     mv julia-1.7.1-linux-x86_64.tar.gz /opt/julia
     cd /opt/julia
     tar -xf julia-1.7.1-linux-x86_64.tar.gz
-    mkdir -p /dev/shm/tmpx
-    cd /dev/shm/tmpx
     echo $PATH
     export PATH=/opt/julia/julia-1.7.1/bin:$PATH
     mkdir -p /opt/juliadepot
     export JULIA_DEPOT_PATH=/opt/juliadepot
     julia -e 'using Pkg; Pkg.update(); Pkg.add(url="https://github.com/bencardoen/ERGO.jl"); Pkg.add(url="https://github.com/bencardoen/SPECHT.jl")'
     julia -e 'using Pkg; Pkg.test("SPECHT")'
+    rm -rf /opt/juliadepot/logs
+    ln -s /dev/shm/ /opt/juliadepot/logs
 
 %environment
     export LC_ALL=C

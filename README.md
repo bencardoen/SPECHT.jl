@@ -84,19 +84,18 @@ Or if you prefer a rebuild
 ```bash
 sudo singularity build specht.sif singularity.def
 ```
-Optionally test the container
-```bash
-singularity test --writable specht.sif
-```
 Then you can login in an interactive shell
 ```bash
 singularity shell --writable specht.sif
 ```
+You need --writable because Julia writes to the container's log file, history etc.
+
 Then you can interact with the container installation as shown below
 ```bash
 Singularity>
 Singularity> julia
 julia> using SPECHT;
+julia> using Pkg; Pkg.test("SPECHT");
 julia> .... # your code here
 ```
 
