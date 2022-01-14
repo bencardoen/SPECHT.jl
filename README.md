@@ -72,25 +72,30 @@ You should see something like this
 ### Singularity
 You can also run SPECHT in a pre-installed [Singularity](https://singularity-docs.readthedocs.io) container.
 
-The container is a curated installation of Fedora 35 with Julia 1.7.1 and the latest version SPECHT.
+The container is a curated installation of Fedora 35 with Julia 1.7.1 and the latest version SPECHT, saving you the steps from installing it locally.
 
-Advantages are: 'build once, run anywhere', and reproducibility, as well as making deployment to cluster computing centers easier.
+Advantages are:
+* build once, run anywhere (portable)
+* reproducibility
+* runs on computing clusters as-is
 
 Get the container
 ```bash
 singularity pull library://bcvcsert/default/specht_f35:0.0.1
 ```
-Or if you prefer a rebuild
+Or if you prefer a rebuild (assumes you have sudo rights)
 ```bash
 sudo singularity build specht.sif singularity.def
 ```
+
+The last step of the build process executes all tests to ensure the container image functions as intended.
+
 Then you can login in an interactive shell
 ```bash
-singularity shell --writable specht.sif
+singularity shell specht_f35_0.0.1.sif
 ```
-You need --writable because Julia writes to the container's log file, history etc.
 
-Then you can interact with the container installation as shown below
+Now you can interact with the container installation as shown below
 ```bash
 Singularity>
 Singularity> julia
@@ -98,6 +103,9 @@ julia> using SPECHT;
 julia> using Pkg; Pkg.test("SPECHT");
 julia> .... # your code here
 ```
+
+**Note**: Julia writes history and logs to $JULIA_DEPOT_PATH/logs. In the container that is a symbolic link to /dev/shm (temporary filesystem).
+Without this, you'd need to execute julia --history=no, and you'll need to enable --writable, which does not always work depending on your Singularity configuration.
 
 <a name="usage"></a>
 ## Usage
