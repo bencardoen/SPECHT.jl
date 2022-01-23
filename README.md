@@ -71,6 +71,7 @@ You should see something like this
 <a name="singularity"></a>
 ### Singularity
 You can also run SPECHT in a pre-installed [Singularity](https://singularity-docs.readthedocs.io) container.
+To run Singularity on Windows, set up [WSL2](https://www.blopig.com/blog/2021/09/using-singularity-on-windows-with-wsl2/).
 
 The container is a curated installation of Fedora 35 with Julia 1.7.1 and the latest version SPECHT, saving you the steps from installing it locally.
 
