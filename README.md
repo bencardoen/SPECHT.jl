@@ -81,12 +81,13 @@ Advantages are:
 
 Get the container
 ```bash
-singularity pull library://bcvcsert/default/specht_f35:0.0.1
+singularity pull --arch amd64 library://bcvcsert/specht/specht_f35_j1.7:0.0.3
 ```
 Or if you prefer a rebuild (assumes you have sudo rights)
 ```bash
 sudo singularity build specht.sif singularity.def
 ```
+You can do this on Windows using WSL2 or with a VM image.
 
 The last step of the build process executes all tests to ensure the container image functions as intended.
 
