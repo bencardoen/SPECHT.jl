@@ -2,7 +2,7 @@ name = "SPECHT"
 uuid = "9bf52c6b-c98d-48f8-80c6-8dab0ddc382a"
 license = "AGPLv3"
 authors = ["Ben Cardoen <bencardoen@fastmail.fm>"]
-version = "0.8.319077"
+version = "0.8.319073"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"

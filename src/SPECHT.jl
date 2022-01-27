@@ -45,7 +45,7 @@ process_non_segmented_non_decon_channels, visout, record_stats, ♌, maskoutline
 ⨥, csum, 🌄, tricoloroutline, cycle_vec_1, checkdrift, checksegmentsaligned, filtercomponents_using_maxima_IQR,
 quantify_c12_mito_overlap, aniso2, cellstats, score_masks_mcc, score_masks_visual, poissonnoise,
 sandp, gaussiannoise, vpdf, fastgaussian2d, computelogotsu, computeotsu, generate_scenario, coordstogt,
-generate_rand_coordinates
+generate_rand_coordinates, aperyapprox, zeta
 
 
 
