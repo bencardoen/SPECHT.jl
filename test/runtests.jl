@@ -590,6 +590,12 @@ using ImageFiltering
             rb = rlap(b)
             @test all(rb .>= 0)
         end
+		bs = [-4, 2.0, 0]
+		as = rlap(bs)
+		@test sum(as) == 4
+		qs = rlap!(bs)
+		@test sum(as) == sum(qs)
+		@test sum(as) == sum(bs)
     end
 
     @testset "mahalanobis" begin

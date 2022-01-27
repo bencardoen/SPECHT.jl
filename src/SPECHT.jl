@@ -40,7 +40,7 @@ annotate_spots, mahalanobis, filterth, intersectimg, filter_k, dice_jaccard,
 jaccard, unionimg, filter_cc_sqr_greater_than, cnl, computeintensityboundary,
 quantify_adjacent_mitophagy, process_cell, computemasks, lowsnrsegment, validatechannels,
 cohen_d, quantify_adjacent_c12, describeimg, tcolors, quantify_nearest_mitophagy,
-heavyedge, nz, ❗0, dropartifacts, segmentnondecon, iterative, id, 𝛁, ⨣, keep_positive,
+heavyedge, nz, ❗0, dropartifacts, rlap!, segmentnondecon, iterative, id, 𝛁, ⨣, keep_positive,
 process_non_segmented_non_decon_channels, visout, record_stats, ♌, maskoutline,
 ⨥, csum, 🌄, tricoloroutline, cycle_vec_1, checkdrift, checksegmentsaligned, filtercomponents_using_maxima_IQR,
 quantify_c12_mito_overlap, aniso2, cellstats, score_masks_mcc, score_masks_visual, poissonnoise,
@@ -847,15 +847,27 @@ function cantelli(xs, μy, σy)
 end
 
 """
+	rlap(array)
     Return the absolute value of the negative part of the array.
 	Used in LoG detection.
 """
 function rlap(lap)
-    lp = copy(lap)
+    return rlap!(copy(lap))
 	z = zero(eltype(lap))
     lp[lp .> z] .= z
     lp .= z .- lp
     return lp
+end
+
+"""
+	rlap!(array)
+    Return the absolute value of the negative part of the array.
+	Used in LoG detection.
+"""
+function rlap!(lap)
+	z = zero(eltype(lap))
+	_f = x ->  x < z ? -x : z
+	return map!(_f, lap, lap)
 end
 
 """
