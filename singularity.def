@@ -1,6 +1,7 @@
 BootStrap: docker
 From: fedora:35
-
+%files
+    runjulia.sh        /opt/runjulia.sh
 
 %post
     dnf install -y wget openssh-clients git
@@ -19,6 +20,8 @@ From: fedora:35
     julia --project=/opt/SPECHT.jl -e 'using SPECHT'
     julia --project=/opt/SPECHT.jl -e 'using Pkg; Pkg.build("SPECHT")'
     julia --project=/opt/SPECHT.jl -e 'using Pkg; Pkg.test("SPECHT")'
+    julia --project=. --trace-compile=dc_precompile.jl src/precompile.jl
+    julia --project=. src/setupimage.jl
     rm -rf /opt/juliadepot/logs
     ln -s /dev/shm/ /opt/juliadepot/logs
 
@@ -32,6 +35,7 @@ From: fedora:35
     echo "Arguments received: $*"
     echo pwd
     exec echo "$@"
+    /opt/runjulia.sh "$@"
 
 %labels
     Author Ben Cardoen, bcardoen@sfu.ca
@@ -40,3 +44,5 @@ From: fedora:35
 %help
     This is a container to offer SPECHT without altering the local user environment, for testing purposes.
     singularity exec julia --project=/opt/SPECHT.jl
+    or
+    julia --project=/opt/SPECHT.jl --sysimage /opt/SPECHT.jl/sys_img.so
