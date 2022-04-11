@@ -102,9 +102,16 @@ Now you can interact with the container installation as shown below
 Singularity>
 Singularity> julia
 julia> using SPECHT;
-julia> using Pkg; Pkg.test("SPECHT");
 julia> .... # your code here
 ```
+
+#### Faster startup times
+You can get an upto **10x** fold speedup in loading SPECHT by using the precompiled image.
+```bash
+singularity exec <image> julia --project=/opt/SPECHT.jl --sysimage=/opt/SPECHT.jl/sys_img.so <your code>
+```
+This is a modified version with all dependencies and frequently used functions pre-compiled, avoiding the JIT overhead.
+If you have long processing jobs, that overhead is not worth optimizing, but for short restartable jobs it can be useful.
 
 **Note**: Julia writes history and logs to $JULIA_DEPOT_PATH/logs. In the container that is a symbolic link to /dev/shm (temporary filesystem).
 Without this, you'd need to execute julia --history=no, and you'll need to enable --writable, which does not always work depending on your Singularity configuration.
