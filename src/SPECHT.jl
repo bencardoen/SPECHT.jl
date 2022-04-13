@@ -1068,7 +1068,7 @@ function process_tiffimage(img, z, sigmas, selfscale, PRC, smooth; selfscalemeth
     i2[end-2:end,:].=0
     i2[:,end-2:end].=0
     if smooth != 0
-        @info "Smoothing"
+        @debug "Smoothing"
         i2 = ImageFiltering.imfilter(i2, ImageFiltering.Kernel.gaussian(smooth))
     end
     ccs = Images.label_components(i2, trues(3,3))
