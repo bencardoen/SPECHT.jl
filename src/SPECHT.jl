@@ -1046,6 +1046,11 @@ function process_tiff(file, z, sigmas, selfscale, tim, smooth, selfscalemethod="
 	return process_tiffimage(img, z, sigmas, selfscale, tim, smooth)
 end
 
+# Use dispatch to allow passing filename or file
+function process_tiffimage(img::AbstractString, z, sigmas, selfscale, PRC, smooth; selfscalemethod="kurtosis", edgemask=nothing)
+	return process_tiffimage(Images.load(img), z, sigmas, selfscale, PRC, smooth; selfscalemethod=selfscalemethod, edgemask=edgemask)
+end
+
 """
 	Same as process_tiff, but from an already loaded image.
 """
