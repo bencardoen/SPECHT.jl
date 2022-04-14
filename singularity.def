@@ -16,12 +16,12 @@ From: fedora:35
     mkdir -p /opt/juliadepot
     export JULIA_DEPOT_PATH=/opt/juliadepot
     cd /opt/SPECHT.jl
-    julia --project=/opt/SPECHT.jl -e 'using Pkg; Pkg.update(); Pkg.instantiate()'
+    julia --project=/opt/SPECHT.jl -e 'using Pkg; Pkg.update(); ENV["PYTHON"]=""; Pkg.build(); Pkg.instantiate()'
     julia --project=/opt/SPECHT.jl -e 'using SPECHT'
     julia --project=/opt/SPECHT.jl -e 'using Pkg; Pkg.build("SPECHT")'
     julia --project=/opt/SPECHT.jl -e 'using Pkg; Pkg.test("SPECHT")'
-    julia --project=. --trace-compile=dc_precompile.jl src/precompile.jl
-    julia --project=. src/setupimage.jl
+    #julia --project=. --trace-compile=dc_precompile.jl src/precompile.jl
+    #julia --project=. src/setupimage.jl
     rm -rf /opt/juliadepot/logs
     ln -s /dev/shm/ /opt/juliadepot/logs
 
@@ -45,4 +45,4 @@ From: fedora:35
     This is a container to offer SPECHT without altering the local user environment, for testing purposes.
     singularity exec julia --project=/opt/SPECHT.jl
     or
-    julia --project=/opt/SPECHT.jl --sysimage /opt/SPECHT.jl/sys_img.so
+    #julia --project=/opt/SPECHT.jl --sysimage /opt/SPECHT.jl/sys_img.so
