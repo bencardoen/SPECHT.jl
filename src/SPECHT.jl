@@ -1129,15 +1129,33 @@ end
 	Return a colorview of up to 3 images where any missing are replaced with a zero image.
 	Transformation is applied before colorview is returned, default identiy
 """
-function tcolors(im2, transform=x -> x)
+function tcolors(im2::AbstractVector, transform=identity)
     N = length(im2)
-	imgs = [transform(i) for i in im2]
+	if transform != identity
+		imgs = [transform(i) for i in im2]
+	else
+		imgs=im2
+	end
     @match N begin
         3 => return Images.colorview(Images.RGB, imgs[1], imgs[2], imgs[3])
 		2 => return Images.colorview(Images.RGB, imgs[1], imgs[2], ERGO.aszero(imgs[1]))
 		1 => return Images.colorview(Images.RGB, imgs[1], ERGO.aszero(imgs[1]), ERGO.aszero(imgs[1]))
         _ => @assert(false)
     end
+end
+
+function tcolors(r::T, g::T, b::T, transform=x -> x) where {T<:Any}
+    return tcolors([r,g,b], transform)
+end
+
+
+function tcolors(r, transform=x -> x)
+    return tcolors([r], transform)
+end
+
+
+function tcolors(r::T, g::T, transform=x -> x) where {T<:Any}
+    return tcolors([r,g], transform)
 end
 
 
