@@ -96,7 +96,9 @@ end
 """
 function coordstogt(coords, X, Y)
 	a = zeros(X, Y)
-	for c in coords
+	_n = size(coords)[1]
+	for i in 1:_n
+		c = coords[i, :]
 		x, y = Int.(round.(c))
 		a[x, y] = 1
 	end

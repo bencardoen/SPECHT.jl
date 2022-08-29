@@ -36,6 +36,8 @@ using ImageFiltering
 		q= generate_rand_coordinates(256, 256, 100; seed=43)
 		@test !all(r .== q)
 		@test size(q, 1) == 100
+		img = coordstogt(q, 256, 256)
+		@test sum(img) <= 100
 	end
 
 	@testset "CS" begin
