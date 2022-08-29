@@ -24,6 +24,10 @@ using ImageFiltering
 
 @testset "SPECHT.jl" begin
 
+	@testset "insilico" begin
+		@test harmonicmean([1, 2, 3]) > 0
+	end
+
 	@testset "CS" begin
 		Random.seed!(42)
 		for _ in 1:100
