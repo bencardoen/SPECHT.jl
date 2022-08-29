@@ -10,4 +10,4 @@ jobs:
       - run:
           command: julia -e 'using Pkg; Pkg.add("Coverage"); Pkg.add(url="https://github.com/bencardoen/ERGO.jl.git"); Pkg.add(url="https://github.com/bencardoen/SPECHT.jl.git"); Pkg.test("SPECHT", coverage=true)'
       - run:
-          command: julia -e 'using Pkg; cd(Pkg.dir("DataCurator")); using Coverage; Codecov.submit(Codecov.process_folder())'
+          command: julia -e 'using Pkg; cd(Pkg.dir("SPECHT")); using Coverage; Codecov.submit(Codecov.process_folder())'
