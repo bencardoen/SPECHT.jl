@@ -24,8 +24,18 @@ using ImageFiltering
 
 @testset "SPECHT.jl" begin
 
-	@testset "insilico" begin
+	@testset "hm" begin
 		@test harmonicmean([1, 2, 3]) > 0
+	end
+
+
+	@testset "insilico" begin
+		r= generate_rand_coordinates(256, 256, 100; seed=42)
+		q= generate_rand_coordinates(256, 256, 100; seed=42)
+		@test all(r .== q)
+		q= generate_rand_coordinates(256, 256, 100; seed=43)
+		@test !all(r .== q)
+		@test size(q, 1) == 100
 	end
 
 	@testset "CS" begin
