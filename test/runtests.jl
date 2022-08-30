@@ -92,6 +92,16 @@ using ImageFiltering
 		_ = computelogotsu(Q)
 	end
 
+	@testset "pcell" begin
+		Random.seed!(42)
+		A = zeros(256, 256)
+		A[20:30, 40:60] .= max.(0.1 .+ rand(11, 21), 1)
+		slices = [A for _ in 1:3]
+		r=process_non_segmented_non_decon_channels(slices; PRC=1, sigma=1, quantile=0.9, pixprec=3)
+		@test r[1] == r[2]
+		@test 232<sum(r[1][1])<233
+	end
+
 	@testset "cv" begin
 		@test cycle_vec_1([1,2,3]) == [2,3,1]
 	end
