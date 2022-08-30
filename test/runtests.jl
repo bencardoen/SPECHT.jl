@@ -607,6 +607,15 @@ using ImageFiltering
 		rm(out, recursive=true)
 	end
 
+	@testset "iqrf" begin
+		Random.seed!(42)
+		img = rand(1024, 1024)
+		img[img .< 0.75] .= 0
+		msk = ERGO.tomask(img)
+		rf = filtercomponents_using_maxima_IQR(img, msk)
+		@test sum(rf) == 216825
+	end
+
 
 	@testset "fth" begin
 		Random.seed!(42)
