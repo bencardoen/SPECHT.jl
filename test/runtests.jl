@@ -102,6 +102,18 @@ using ImageFiltering
 		@test 232<sum(r[1][1])<233
 	end
 
+	@testset "vismask" begin
+		res = Dict()
+		res[1] = [zeros(10, 10)]
+		res[1][end][5:6, 5:6] .= 1
+		res[2] = [zeros(10, 10)]
+		res[2][end][5:6, 5:6] .= 1
+		res[0] = [zeros(10, 10)]
+		res[0][end][5:6, 5:6] .= 1
+		a, b = computemasks(res, res[0][end])
+		@test sum(a) == sum(b)
+	end
+
 	@testset "cv" begin
 		@test cycle_vec_1([1,2,3]) == [2,3,1]
 	end

@@ -853,10 +853,6 @@ end
 """
 function rlap(lap)
     return rlap!(copy(lap))
-	z = zero(eltype(lap))
-    lp[lp .> z] .= z
-    lp .= z .- lp
-    return lp
 end
 
 """
@@ -1646,23 +1642,6 @@ function process_cell(qpath, channels, outdir, serie, subdir, experiment, z, sel
 	### return default_specht_spots
 	return res, 0, false, resulting_images
 end
-
-function default_specht_spots(images; z, sigma, selfscale, prc, edgemasks=nothing, SQR, metadata)
-	### TODO integrate
-	for (ichannel, image) in enumerate(images)
-		channel = ichannel - 1
-		ccs, imgl, Tg, _img, msk = process_tiffimage(image, z, [sigma, sigma], selfscale, prc, 0, edgemask= isnothing(edgemasks) ? edgemasks : edgemasks[ichannel] )
-		outf = joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_$(channel)_mask.tif")
-		Images.save(outf, msk)
-		cmsk = filter_cc_sqr_greater_than(ccs, _img, SQR)
-		ccs = Images.label_components(cmsk, trues(3,3))
-		outf = joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_$(channel)_mask_filtered_$(SQR).tif")
-		Images.save(outf, cmsk)
-		res[channel] = (ccs, cmsk)
-	end
-	return res, 0, false, Dict((i-1)=>images[i] for i in 1:length(images))
-end
-
 
 function computemasks(res, union_mask_c12)
 	_c1mask = res[1][end]
