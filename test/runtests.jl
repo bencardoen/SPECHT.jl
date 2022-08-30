@@ -89,6 +89,15 @@ using ImageFiltering
 		a, b = computeotsu(Q)
 
 		@test sum(b .* Q) < sum(a .* Q) < sum(Q)
+		_ = computelogotsu(Q)
+	end
+
+	@testset "cv" begin
+		@test cycle_vec_1([1,2,3]) == [2,3,1]
+	end
+
+	@testset "cs" begin
+		@test csum(1, 2) == 1
 	end
 
 	@testset "scoring" begin
