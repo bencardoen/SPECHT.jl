@@ -594,6 +594,17 @@ using ImageFiltering
 		@test res[3] == false
 		rm(tmp, recursive=true)
 		rm(out, recursive=true)
+
+		tmp = mktempdir()
+		out = mktempdir()
+		C0, C1, C2 = [zeros(100, 100) for i in 1:3]
+		images = C0, C1, C2
+		for (i,img) in enumerate(images)
+			Images.save(joinpath(tmp, "ch0$(i-1).tif"), img)
+		end
+		res = process_cell(tmp, [0,1,2], out, "na", "na",  "na", 1.5, false, 2, 5, mode="apery")
+		rm(tmp, recursive=true)
+		rm(out, recursive=true)
 	end
 
 
