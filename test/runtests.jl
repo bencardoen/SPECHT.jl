@@ -30,14 +30,21 @@ using ImageFiltering
 
 
 	@testset "insilico" begin
-		r= generate_rand_coordinates(256, 256, 100; seed=42)
-		q= generate_rand_coordinates(256, 256, 100; seed=42)
-		@test all(r .== q)
-		q= generate_rand_coordinates(256, 256, 100; seed=43)
-		@test !all(r .== q)
-		@test size(q, 1) == 100
-		img = coordstogt(q, 256, 256)
-		@test sum(img) <= 100
+		g, t, r, r1 = generate_scenario(256, 256, 20, 20)
+		g2, t2, r2, r3 = generate_scenario(256, 256, 40, 40)
+		sum(g) < sum(g2)
+	end
+
+	@testset "noise" begin
+		g=gaussiannoise(zeros(10, 10), 1; μ=0, bits=8)
+		k=gaussiannoise(zeros(10, 10), 4; μ=0, bits=8)
+		@test sum(g) < sum(k)
+		p=poissonnoise(zeros(10,10), 1; bits=8)
+		p2=poissonnoise(zeros(10,10), 10; bits=8)
+		@test sum(p) < sum(p2)
+		p3=sandp(1, zeros(10,10))[2]
+		p4=sandp(10, zeros(10,10))[2]
+		@test sum(p3) > sum(p4)
 	end
 
 	@testset "CS" begin
