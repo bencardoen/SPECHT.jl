@@ -42,9 +42,72 @@ using ImageFiltering
 		p=poissonnoise(zeros(10,10), 1; bits=8)
 		p2=poissonnoise(zeros(10,10), 10; bits=8)
 		@test sum(p) < sum(p2)
+		Random.seed!(42)
 		p3=sandp(1, zeros(10,10))[2]
 		p4=sandp(10, zeros(10,10))[2]
 		@test sum(p3) > sum(p4)
+	end
+
+	@testset "apo" begin
+		Q = zeros(100, 100)
+		Q[20:20, 20:20] .= 1
+		ccs=Images.label_components(Q)
+		r = annotate_spots(Q, ccs, [.42])
+		@test Images.N0f16.(0.42) ∈ unique(r)
+	end
+
+	@testset "fth" begin
+		Q=ones(10, 10)
+		Q[2:2, 2:2] .= 0
+		r=filterth(Q, .5)
+		@test length(r) == 1
+	end
+
+	@testset "t3" begin
+		r=tcolors([zeros(10, 10)], x->x)
+		@test eltype(r) <: Images.RGB
+		r=tcolors(zeros(10, 10), zeros(10, 10), zeros(10, 10), x->x)
+		@test eltype(r) <: Images.RGB
+	end
+
+	@testset "cd" begin
+		d="Q"
+		if isdir(d)
+			rm(d)
+		end
+		@test ! isdir(d)
+		checkdir(d)
+		@test isdir(d)
+		rm(d)
+	end
+
+
+	@testset "ots" begin
+
+		Q = Random.rand(100, 100)
+		Q[Q .< .5] .= 0.01
+		a, b = computeotsu(Q)
+
+		@test sum(b .* Q) < sum(a .* Q) < sum(Q)
+	end
+
+	@testset "scoring" begin
+		Random.seed!(42)
+		R = Random.rand(100, 100)
+		Q = copy(R)
+		R[R .< 0.5] .= 0
+		Q[Q .< 0.25] .= 0
+		fp, tp, fn = score_masks_visual(ERGO.tomask(Q), ERGO.tomask(R))
+		fp2, tp2, fn2= score_masks_visual(ERGO.tomask(Q), ERGO.tomask(Q))
+		@test sum(tp) < sum(tp2)
+		Random.seed!(42)
+		R = Random.rand(100, 100)
+		Q = copy(R)
+		R[R .< 0.5] .= 0
+		Q[Q .< 0.45] .= 0
+		Q[Q .> 0.75] .= 0
+		fp, tp, fn, m = score_masks_mcc(ERGO.tomask(R), ERGO.tomask(Q))
+		abs(m)-abs(0.249702443995) < 0.01
 	end
 
 	@testset "CS" begin
