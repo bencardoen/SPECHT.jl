@@ -28,6 +28,17 @@ using ImageFiltering
 		@test harmonicmean([1, 2, 3]) > 0
 	end
 
+	@testset "apr" begin
+		na = aperyapprox(10)
+		nb = aperyapprox(5)
+		nc = aperyapprox(2)
+		@test nc == 1+1/8
+		@test na != nb
+		N=10
+		aqs = [aperyapprox(i) for i in 1:N]
+		@test all([aqs[i] < aqs[i+1] for i in 1:N-1])
+	end
+
 
 	@testset "insilico" begin
 		g, t, r, r1 = generate_scenario(256, 256, 20, 20)
