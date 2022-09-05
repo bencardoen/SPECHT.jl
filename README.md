@@ -474,6 +474,8 @@ Datasets for the paper (including output) can be found [here](https://vault.sfu.
 Note that the data is licensed (with original providers' reserved rights superceding this license) under [CC BY-NC-ND 4.00](https://creativecommons.org/licenses/by-nc-nd/4.0/)
 If you wish to re-use the data, please contact us.
 
+We have limited annotations on 3 ROIs in [data/annotated.zip]([data/annotated.zip]), used in [analysis/realsted.jl](analysis/realsted.jl).
+
 ##### Checksum
 
 The datasets.zip should have an SHA256 checksum of
