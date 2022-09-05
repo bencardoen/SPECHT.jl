@@ -63,22 +63,14 @@ I=Images.load(IN)
 
 
 #Process PC3PTRF
-# ccs, cll = SPECHT.process_tiffimage(I, 0, [0,σ], true, PRC, 0)[1:2];
-# fts_pc3 = getfeatures(I, ccs, rlap(cll))
 mccs, fts_mc5 = analyzeimage(M, σ, PRC)
 ccs, fts_pc3 = analyzeimage(I, σ, PRC)
-#
-# scatter(fts_pc3[:,1], fts_pc3[:,3])
-# scatter!(fts_mc5[:,1], fts_mc5[:,3])
 
 pc_to_5 = contrast_x_to_y(fts_pc3[:,[2]], fts_mc5[:,[2]])
 pc_to_c = contrast_x_to_y(fts_pc3[:,[2]], fts_pc3[:,[2]])
 labeled_5 = label_image(ccs, max.(0.25, pc_to_5))
 labeled_c = label_image(ccs, max.(0.25, 1 .- pc_to_c))
-imshow(maskoutline(labeled_c))
 
-scatter(1 .- pc_to_c, fts_pc3[:,2])
-scatter!(pc_to_5, fts_pc3[:,2])
 
 
 imshow(SPECHT.tcolors([ fuse_images(GTI, maskoutline(labeled_5)), fuse_images(GTI, maskoutline(labeled_c)), GTI .+ ERGO.tomask(A)]))
@@ -111,12 +103,8 @@ end
 
 ## Degrade with noise
 X, Y = size(I)
-## Compute for PC3
-	## TODO same for MC5
-	## Compute features and labels
-	## Save= size(I)
+
 facs = [16]
-## Reuses the 'total' image from previous snippet
 results  = Dict()
 pc3 = copy(I)
 mc5 = copy(M)
@@ -165,13 +153,12 @@ for RI in 1:length(roiSn)
 	Images.save(joinpath(output, "annotate_roi_noise_$(RI)_gt.tif"), _i)
 end
 
-# nm = i -> i ./ maximum(i)
+
 fm = (x, y) -> fuse_max(x, y)
 
-# _i = SPECHT.tcolors( [ fm(GTRI,maskoutline(roi5[RI])), fm(GTRI, maskoutline(roiC[RI])), GTRI])
+
 
 for RI in 1:length(roiSn)
-	# fuse_images(GTI, maskoutline(labeled_5))
 	GTRI = fm(roiIn[RI], roiAn[RI])
 	_i=SPECHT.tcolors( [ fm(GTRI,maskoutline(roi5n[RI])), fm(GTRI, maskoutline(roiCn[RI])), GTRI])
 	Images.save(joinpath(output, "annotate_roi_$(RI)_noise.tif"), _i)
@@ -179,27 +166,12 @@ end
 
 
 
-	# roiI, roiA, roiS = [slicerois(i, roibox) for i in [noisedimage, A, out]]
-# 	# RI=1
-# 	for RI in 1:length(roiS)
-# 		_i = SPECHT.tcolors( [ roiI[RI]./maximum(roiI[RI]), roiA[RI]./maximum(roiA[RI]), roiS[RI]./maximum(roiS[RI])])
-# 		Images.save(joinpath(output, "annotate_roi_$(RI)_noise_$j.tif"), _i)
-#
-# 		_i = roiI[RI]
-# 		Images.save(joinpath(output, "annotate_roi_$(RI)_noise_$(j)_gt.tif"), _i)
-# 	end
-# 	results[NSFAC] = ccs, out, noisedimage, cmsk, roiI, roiA, roiS
-# end
-#
-
 ccs, out, ni, cmsks, roiI, roiA, roiS=results[facs[1]]
 
 imshow(SPECHT.tcolors([ni, ERGO.tomask(A), SPECHT.maskoutline(ERGO.tomask(ccs))]))
 imshow(SPECHT.tcolors([ni, ERGO.tomask(A), out]))
 
 
-
-### Functions
 
 function annotate_at(img, coords, vals)
     _im = copy(img)
