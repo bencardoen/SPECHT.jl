@@ -645,6 +645,17 @@ using ImageFiltering
 				@test maximum(res[1]) >= 1
 			end
 		end
+		img = zeros(100, 100)
+		img[45:55, 45:55] .= 1
+		sigmas = [3, 3]
+		em = copy(img)
+		em[44:56, 44:56] .=1
+		em = em .- img
+		img = img + rand(100, 100)./5
+		Images.save("qt.tif", img ./ maximum(img))
+		sigmas = [3, 3]
+		res = process_tiffimage("qt.tif", .5, sigmas, false, 1, 0, edgemask=nothing)
+		rm("qt.tif")
     end
 
     @testset "fk" begin
