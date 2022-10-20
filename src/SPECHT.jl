@@ -45,7 +45,7 @@ process_non_segmented_non_decon_channels, visout, record_stats, ♌, maskoutline
 ⨥, csum, 🌄, tricoloroutline, cycle_vec_1, checkdrift, checksegmentsaligned, filtercomponents_using_maxima_IQR,
 quantify_c12_mito_overlap, aniso2, cellstats, score_masks_mcc, score_masks_visual, poissonnoise,
 sandp, gaussiannoise, vpdf, fastgaussian2d, computelogotsu, computeotsu, generate_scenario, coordstogt,
-generate_rand_coordinates, aperyapprox, zeta
+generate_rand_coordinates, aperyapprox, zeta, colormask
 
 
 
@@ -71,6 +71,25 @@ function generate_rand_coordinates(X, Y, N; offset=0, seed=nothing)
 		rs[:,2] .*= Y
 	end
 	rs
+end
+
+"""
+	colormask(colorimg, binarymask)
+	Return, for an RGB image, the masked version.
+	Works around RGB*N0f8 not being supported
+"""
+function colormask(raw, mask)
+    X, Y = size(raw)
+    res = ERGO.aszero(raw)
+    m = ImageMorphology.dilate(mask)
+    for x in 1:X
+        for y in 1:Y
+            if m[x,y] > 0
+                res[x, y] = raw[x,y]
+            end
+        end
+    end
+    res
 end
 
 """
