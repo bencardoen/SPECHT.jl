@@ -1,5 +1,7 @@
 # SPECHT.jl
 
+<img src="figures/specht.png" width="1024">
+
 SPECHT is a Julia implementation of a contrastive weakly supervised object detection and identification method for fluorescence microscopy.
 
 ## Test results on Circle CI
