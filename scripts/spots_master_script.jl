@@ -16,6 +16,7 @@
 using SPECHT
 using Images, Colors, DataFrames, CSV, Statistics, LinearAlgebra
 import Glob
+import Colocalization
 using Logging
 import ImageMagick
 import ImageFiltering
