@@ -461,11 +461,15 @@ If you don't follow the structure, images will not be processed.
 ### Cite
 If you find this repository of use, please cite
 ```
-@article{cardoen2020specht,
-  title={SPECHT: Self-tuning Plausibility Based Object Detection Enables Quantification of Conflict in Heterogeneous Multi-scale Microscopy},
+@article{cardoen2022specht,
+  title={SPECHT: S elf-tuning P lausibility based object detection E nables quantification of C onflict in H et erogeneous multi-scale microscopy},
   author={Cardoen, Ben and Wong, Timothy and Alan, Parsa and Lee, Sieun and Matsubara, Joanne Aiko and Nabi, Ivan Robert and Hamarneh, Ghassan},
-  year={2020},
-  publisher={TechRxiv}
+  journal={Plos one},
+  volume={17},
+  number={12},
+  pages={e0276726},
+  year={2022},
+  publisher={Public Library of Science San Francisco, CA USA}
 }
 ```
 
