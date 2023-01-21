@@ -20,6 +20,7 @@ import Glob
 import ImageMagick
 import ImageFiltering
 import Random
+import Colocalization
 using Colors
 using Gtk.ShortNames
 using Distributions

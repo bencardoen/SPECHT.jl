@@ -15,6 +15,7 @@ using Test
 using SPECHT
 using Random
 using Statistics
+import Colocalization
 using Logging
 import Images
 import ERGO
