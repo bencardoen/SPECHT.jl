@@ -105,6 +105,14 @@ git-tree-sha1 = "ded953804d019afa9a3f98981d99b33e3db7b6da"
 uuid = "944b1d66-785c-5afd-91f1-9de20f533193"
 version = "0.7.0"
 
+[[deps.Colocalization]]
+deps = ["DataFrames", "Distributions", "ImageFiltering", "Images", "Logging", "ProgressMeter", "Random", "Statistics", "Test"]
+git-tree-sha1 = "1ac766ebc70c199147ef541228c9682386c375e2"
+repo-rev = "main"
+repo-url = "https://github.com/bencardoen/Colocalization.jl.git"
+uuid = "5deedb61-f8ac-43ca-82f0-d70c51e04289"
+version = "0.1.0"
+
 [[deps.ColorTypes]]
 deps = ["FixedPointNumbers", "Random"]
 git-tree-sha1 = "eb7f0f8307f71fac7c606984ea5fb2817275d6e4"

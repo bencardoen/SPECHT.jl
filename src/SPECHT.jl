@@ -19,6 +19,7 @@ module SPECHT
 import DataFrames
 import CSV
 import ERGO
+import Colocalization
 using Logging
 import Images
 import Random
@@ -80,7 +81,7 @@ end
 """
 function colormask(raw, mask)
     X, Y = size(raw)
-    res = ERGO.aszero(raw)
+    res = Colocalization.aszero(raw)
     m = ImageMorphology.dilate(mask)
     for x in 1:X
         for y in 1:Y
@@ -119,7 +120,7 @@ function coordstogt(coords, X, Y)
 		x, y = Int.(round.(c))
 		a[x, y] = 1
 	end
-	ERGO.tomask(a)
+	Colocalization.tomask(a)
 end
 
 """
@@ -160,7 +161,7 @@ end
 		for each component in pr_mask.
 """
 function score_masks_visual(gt_mask, pr_mask)
-	fp, tp, fn = ERGO.aszero(gt_mask), ERGO.aszero(gt_mask), ERGO.aszero(gt_mask)
+	fp, tp, fn = Colocalization.aszero(gt_mask), Colocalization.aszero(gt_mask), Colocalization.aszero(gt_mask)
 	gt_ccs = Images.label_components(gt_mask)
 	pr_ccs = Images.label_components(pr_mask)
 	gt_inds = Images.component_indices(gt_ccs)[2:end]
@@ -188,7 +189,7 @@ end
 """
 function computelogotsu(raw, σ=3)
 	blg = Images.blob_LoG(raw,[σ,2*σ])
-	mk = Float64.(ERGO.aszero(raw))
+	mk = Float64.(Colocalization.aszero(raw))
 	for b in blg
 		x = b.location[1]
 		y = b.location[2]
@@ -266,7 +267,7 @@ function aniso2(Q)
 end
 
 function cellstats(cellgraymask)
-	CM = ERGO.tomask(cellgraymask)
+	CM = Colocalization.tomask(cellgraymask)
 	area = length(CM[CM.>0])
 	aniso, λ1, λ2 = aniso2(cellgraymask)
 	return Dict(:area=>area, :anisotropy=>aniso, :λ1=>λ1, :λ2=>λ2)
@@ -334,7 +335,7 @@ end
 function filtercomponents_using_maxima_IQR(raw_nsegmented_image, mask; sigma=0.25)
 	ccs = Images.label_components(mask)
 	raw_segmented_image = ImageFiltering.imfilter(raw_nsegmented_image, ImageFiltering.Kernel.gaussian((0.25, 0.25)))
-	MXF = ERGO.aszero(raw_segmented_image)
+	MXF = Colocalization.aszero(raw_segmented_image)
 	Q3 = StatsBase.quantile(❗0(raw_segmented_image), 0.75)
 	Q1 = StatsBase.quantile(❗0(raw_segmented_image), 0.25)
 	IQR = Q3-Q1
@@ -357,7 +358,7 @@ end
 	Return a mask where components present in msk_to_keep are retained, remainder dropped.
 """
 function dropccs(ccs, msk)
-	res = ERGO.aszero(msk)
+	res = Colocalization.aszero(msk)
 	indices = Images.component_indices(ccs)[2:end]
 	for ind in indices
 		if any(msk[ind] .> 0)
@@ -440,17 +441,17 @@ function segmentnondecon(nimg, iters=3, quantile=0.75)
 	ftm2 = SPECHT.denoisemd(ft1, 2)
 	ftm3 = SPECHT.denoisemd(ftm2, 3)
 	## Find largest component ~ cell
-	ccs = Images.label_components(ERGO.tomask(ftm3))
+	ccs = Images.label_components(Colocalization.tomask(ftm3))
 	if maximum(ccs) < 1
 		@debug "No object"
 		return nothing
 	end
 	lns = Images.component_lengths(ccs)[2:end]
 	sz, i = findmax(lns)
-	Q = ERGO.aszero(cimg)
+	Q = Colocalization.aszero(cimg)
 	Q[Images.component_indices(ccs)[2:end][i]] .= 1
 	## Dilate to make sure we get sufficient border
-	Q = ERGO.tomask(iterative(Q, ImageMorphology.dilate, iters))
+	Q = Colocalization.tomask(iterative(Q, ImageMorphology.dilate, iters))
 	# If holes are present < precision, close them
 	Q = iterative(Q, ImageMorphology.closing, iters*2)
 	if checkdrift(Q, iters)
@@ -479,7 +480,7 @@ function process_non_segmented_non_decon_channels(slices; PRC=1, sigma=1, quanti
 		return nothing
 	end
 	# Fuse to ensure we get everything (especially for mito)
-	all3 = ERGO.tomask(reduce(.+, segments))
+	all3 = Colocalization.tomask(reduce(.+, segments))
 	alledge = ⨣(𝛁(all3))
 	edges = [⨣(𝛁(s)) for s in segments]
 	results = Dict()
@@ -548,7 +549,7 @@ function sandp(grade, img)
 	rn = rand(X,Y)
 	rn[rn .> 0.5] .= 1
 	rn[rn .<= 0.5] .= 0
-	rn = ERGO.tomask(rn)
+	rn = Colocalization.tomask(rn)
 	IQ = copy(img)
 	IQ[ps .> grade] .= img[ps .> grade].*rn[ps .> grade]
 	return IQ, ps
@@ -583,13 +584,13 @@ end
 	Px marging dilates each spot with k pixels to compensate for precision
 """
 function quantify_c12_mito_overlap(c1c2_img, mito_img, raw_mito_img; pxmargin=0)
-	mito_mask = ERGO.tomask(mito_img)
-	c1c2_coms = Images.label_components(ERGO.tomask(c1c2_img), trues(3,3))
+	mito_mask = Colocalization.tomask(mito_img)
+	c1c2_coms = Images.label_components(Colocalization.tomask(c1c2_img), trues(3,3))
 	C1C2_N = maximum(c1c2_coms)
 	@debug "Got $(C1C2_N) components"
 	result = zeros(Float64, C1C2_N, 3)
 	for (nth, indexn) in enumerate(Images.component_indices(c1c2_coms)[2:end])
-		C12 = ERGO.aszero(c1c2_img)
+		C12 = Colocalization.aszero(c1c2_img)
 		C12[indexn] .= 1
 		if pxmargin > 0
 			C12 = SPECHT.iterative(C12, ImageMorphology.dilate, pxmargin)
@@ -619,7 +620,7 @@ end
 
 function keepyellow(tif)
     image = copy(tif)
-    CO = ERGO.aszero(image)
+    CO = Colocalization.aszero(image)
     # yellow =  Images.RGB{Images.N0f16}.( 1, 1, 0)
     CO[(Images.red.(image) .== 1) .& (Images.green.(image) .== 1)] .= Images.RGB{Images.N0f16}.( 1, 1, 0)
     return CO
@@ -628,19 +629,19 @@ end
 function quantify_nearest_mitophagy(c1c2_mask, mito_mask, mito_img)
 	# Find the min distance to nearest mito from C1C2, its area, and its mean intensity
 	c1c2_coms = Images.label_components(c1c2_mask, trues(3,3))
-	mito_coms = Images.label_components(ERGO.tomask(mito_mask), trues(3,3))
+	mito_coms = Images.label_components(Colocalization.tomask(mito_mask), trues(3,3))
 	N = maximum(c1c2_coms)
 	M = maximum(mito_coms)
 	@debug "Have $N C1C2 and $M Mito"
 	if N == 0
 		@debug "No C1C2 components"
-		return nothing, ERGO.aszero(mito_img)
+		return nothing, Colocalization.aszero(mito_img)
 	end
 	if M == 0
 		@debug "No Mito components"
 		res = zeros(Float64, N, 3)
 		res[:, 1] .= Inf
-		return res, ERGO.aszero(mito_img)
+		return res, Colocalization.aszero(mito_img)
 	end
 	c1c2indices = Images.component_indices(c1c2_coms)[2:end]
 	mito_indices = Images.component_indices(mito_coms)[2:end]
@@ -649,9 +650,9 @@ function quantify_nearest_mitophagy(c1c2_mask, mito_mask, mito_img)
 		@warn "1 mito only, suspect, please check mask"
 	end
 	results = zeros(Float64, N, 3)
-	cm = ERGO.aszero(c1c2_mask)
-	c1c2res = ERGO.aszero(c1c2_mask)
-	mitores = ERGO.aszero(c1c2_mask)
+	cm = Colocalization.aszero(c1c2_mask)
+	c1c2res = Colocalization.aszero(c1c2_mask)
+	mitores = Colocalization.aszero(c1c2_mask)
 	for (ic1c2, c1c2indices) in enumerate(c1c2indices)
 		cm[c1c2indices] .= 1
 		distance_map = Images.distance_transform(Images.feature_transform(Bool.(cm)))
@@ -697,7 +698,7 @@ function dropartifacts(ccs, segmented)
 	allindices = Images.component_indices(ccs)[2:end]
 	base = ❗0(segmented)
 	cohens = [indices for indices in allindices if cohen_d(segmented[indices], base) > 0]
-	SF = ERGO.aszero(segmented)
+	SF = Colocalization.aszero(segmented)
 	for ind in cohens
 		SF[ind] .= 1
 	end
@@ -726,7 +727,7 @@ end
 """
 function intersectimg(left, right)
 	@assert(size(left) == size(right))
-	res = ERGO.aszero(left)
+	res = Colocalization.aszero(left)
 	Z = zero(eltype(left))
 	One = one(eltype(left))
 	res[(left .> Z) .& (right .> Z)] .= One
@@ -737,7 +738,7 @@ end
 	Return a mask where connected components of img are > SQ in both X and Y.
 """
 function filter_cc_sqr_greater_than(ccs, img, SQ)
-    msk = ERGO.aszero(img)
+    msk = Colocalization.aszero(img)
     indices = Images.component_indices(ccs)[2:end]
     boxes = Images.component_boxes(ccs)[2:end]
     for (i, _ind) in enumerate(indices)
@@ -818,7 +819,7 @@ end
 	Return union (pixelbased) of two images, left argument determines type.
 """
 function unionimg(left, right)
-	res = ERGO.aszero(left)
+	res = Colocalization.aszero(left)
 	Z = zero(eltype(left))
 	One = one(eltype(left))
 	res[(left .> Z) .| (right .> Z)] .= One
@@ -948,13 +949,13 @@ function lowsnrsegment(img; edgeiters=20, sigmas=(2,2))
 	### Blur to be a bit less conservative
 	smoothedmedian = ImageFiltering.imfilter(median2, ImageFiltering.Kernel.gaussian((sigmas)))
 	### Select the cell as the largest component
-	MASK = ERGO.tomask(smoothedmedian)
+	MASK = Colocalization.tomask(smoothedmedian)
 	CCS = Images.label_components(MASK)
 	lengths = Images.component_lengths(CCS)[2:end]
 	maxcomp = findall(lengths .== maximum(lengths))
 	@assert(length(maxcomp) == 1)
-	cellmask = ERGO.aszero(MASK)
-	cellimg = ERGO.aszero(MASK)
+	cellmask = Colocalization.aszero(MASK)
+	cellimg = Colocalization.aszero(MASK)
 	indices = Images.component_indices(CCS)[2:end][maxcomp][1]
 	cellimg[indices] .= img[indices]
 	cellmask[indices] .= oneunit(eltype(img))
@@ -974,7 +975,7 @@ function heavyedge(mask, iters=5)
 		d = ImageMorphology.dilate(d)
 	end
 	d[d .< 0] .= 0
-	return ERGO.tomask(d)
+	return Colocalization.tomask(d)
 end
 
 """
@@ -1116,14 +1117,14 @@ function quantify_adjacent_c12(mitomask, c12mask)
 	@debug "Have $NM mitochondria spots and $NC12 C12 spots"
 	if NM == 0
 		@debug "No mito spots"
-		return nothing, ERGO.aszero(mitomask)
+		return nothing, Colocalization.aszero(mitomask)
 	end
 	if NC12 == 0
 		@debug "No C12 Spots"
-		return [Inf64 for _ in 1:NM], ERGO.aszero(mitomask)
+		return [Inf64 for _ in 1:NM], Colocalization.aszero(mitomask)
 	end
-	targetmask = ERGO.aszero(mitomask)
-	nearestc12 = ERGO.aszero(mitomask)
+	targetmask = Colocalization.aszero(mitomask)
+	nearestc12 = Colocalization.aszero(mitomask)
 	c12indices = Images.component_indices(c1c2_coms)[2:end]
 	mindistances = zeros(NM)
 	for (nth, indexn) in enumerate(Images.component_indices(mito_coms)[2:end])
@@ -1153,8 +1154,8 @@ function tcolors(im2::AbstractVector, transform=identity)
 	end
     @match N begin
         3 => return Images.colorview(Images.RGB, imgs[1], imgs[2], imgs[3])
-		2 => return Images.colorview(Images.RGB, imgs[1], imgs[2], ERGO.aszero(imgs[1]))
-		1 => return Images.colorview(Images.RGB, imgs[1], ERGO.aszero(imgs[1]), ERGO.aszero(imgs[1]))
+		2 => return Images.colorview(Images.RGB, imgs[1], imgs[2], Colocalization.aszero(imgs[1]))
+		1 => return Images.colorview(Images.RGB, imgs[1], Colocalization.aszero(imgs[1]), Colocalization.aszero(imgs[1]))
         _ => @assert(false)
     end
 end
@@ -1246,27 +1247,27 @@ end
 function quantify_adjacent_mitophagy(c1c2_img, mito_img, raw_mito_img, TH_1, TH_2)
 	@assert 0 <= TH_1 <= TH_2
 	@assert size(c1c2_img) == size(mito_img)
-	c1c2_coms = Images.label_components(ERGO.tomask(c1c2_img), trues(3,3))
+	c1c2_coms = Images.label_components(Colocalization.tomask(c1c2_img), trues(3,3))
 	N = maximum(c1c2_coms)
 	@debug "C1C2 $N components"
 	if N == 0
 		@debug "No C1C2 components"
-		return nothing, ERGO.aszero(mito_img)
+		return nothing, Colocalization.aszero(mito_img)
 	end
-	mito_coms = Images.label_components(ERGO.tomask(mito_img), trues(3,3))
-	mito_intensity = raw_mito_img .* ERGO.tomask(mito_img)
+	mito_coms = Images.label_components(Colocalization.tomask(mito_img), trues(3,3))
+	mito_intensity = raw_mito_img .* Colocalization.tomask(mito_img)
 	mint = mito_intensity[:]
 	mint = Float64.(mint[mint .> 0])
 	μi, σi = Statistics.mean(mint), Statistics.std(mint)
 	@debug "Have $(maximum(mito_coms)) mitochondria spots"
 	N = maximum(c1c2_coms)
 	results = zeros(N, 6)
-	resmask = ERGO.aszero(mito_img)
+	resmask = Colocalization.aszero(mito_img)
 	q = nothing
 	for (nth, indexn) in enumerate(Images.component_indices(c1c2_coms)[2:end])
 		@debug "Checking $nth"
 		# Nr of pixels 5-10, mean intensity, std, intensity
-		cm = ERGO.aszero(c1c2_img)
+		cm = Colocalization.aszero(c1c2_img)
 		cm[indexn] .= 1
 		distance_map = Images.distance_transform(Images.feature_transform(Bool.(cm)))
 		## Get all the mito spots with a minimum distance < TH_1
@@ -1275,7 +1276,7 @@ function quantify_adjacent_mitophagy(c1c2_img, mito_img, raw_mito_img, TH_1, TH_
 		nd = copy(distance_map)
 		nd[distance_map .>= TH_2] .= 0
 		nd[distance_map .< TH_2] .= 1
-		dm = ERGO.tomask(nd)
+		dm = Colocalization.tomask(nd)
 		sliced_mito = mito_intensity .* dm
 		for mito_ind in selected_mito
 			resmask[mito_ind] .= sliced_mito[mito_ind]
@@ -1310,9 +1311,9 @@ end
 	Report the mean, std intensities of those areas, and the distance map (binary) of the area around left
 """
 function computeintensityboundary(left, right, k=2)
-	coms = Images.label_components(ERGO.tomask(left), trues(3,3))
+	coms = Images.label_components(Colocalization.tomask(left), trues(3,3))
 	ind = Images.component_indices(coms)[2:end]
-	mc = ERGO.aszero(ERGO.tomask(left))
+	mc = Colocalization.aszero(Colocalization.tomask(left))
 	N = maximum(coms)
 	results = zeros(N, 2)
 	for (nth, indexn) in enumerate(Images.component_indices(coms)[2:end])
@@ -1327,7 +1328,7 @@ function computeintensityboundary(left, right, k=2)
 		results[nth, :] = [m, s ]
 		mc .= 0
 	end
-	dismap = Images.distance_transform(Images.feature_transform(Bool.(ERGO.tomask(left))))
+	dismap = Images.distance_transform(Images.feature_transform(Bool.(Colocalization.tomask(left))))
 	dp = copy(dismap)
 	dp[dismap .< k] .= 1
 	dp[dismap .>= k] .= 0
@@ -1371,7 +1372,7 @@ function quantify_spots_mitophagy_new(res)
 	if iszero(mask_mito)
 		distances = []
 	else
-		distances = compute_distances_cc_to_mask(c1_c2_u_comps, ERGO.tomask(ccmito))
+		distances = compute_distances_cc_to_mask(c1_c2_u_comps, Colocalization.tomask(ccmito))
 	end
 
     _c1c2m = _fum .* mask_mito
@@ -1446,7 +1447,7 @@ end
 # 	Input and output are binary masks.
 # """
 # function score_masks_visual(gt_mask, pr_mask)
-# 	fp, tp, fn = ERGO.aszero(gt_mask), ERGO.aszero(gt_mask), ERGO.aszero(gt_mask)
+# 	fp, tp, fn = Colocalization.aszero(gt_mask), Colocalization.aszero(gt_mask), Colocalization.aszero(gt_mask)
 # 	gt_ccs = Images.label_components(gt_mask)
 # 	pr_ccs = Images.label_components(pr_mask)
 # 	gt_inds = Images.component_indices(gt_ccs)[2:end]
@@ -1539,8 +1540,8 @@ function validatechannels(path)
 	end
 	if (Nimg == 2) & (channelnrs[1] == 1)
 		@debug "No mito channel, adding zeroed channel"
-		# mito = [ERGO.aszero(images[1])]
-		return [ERGO.aszero(images[1]), images[1], images[2]]
+		# mito = [Colocalization.aszero(images[1])]
+		return [Colocalization.aszero(images[1]), images[1], images[2]]
 		# return vcat([mito, images...])
 	end
 	@warn "Invalid number of images $(channelnrs) != 2,3"
@@ -1599,8 +1600,8 @@ function process_cell(qpath, channels, outdir, serie, subdir, experiment, z, sel
 			if channel == 0
 				@assert length(cellmasks) == 2
 				image = image .* (cellmasks[1][1] .+ cellmasks[2][1])
-				cellmask = ERGO.tomask(image)
-				edgemask = ERGO.tomask(cellmasks[1][2] .+ cellmasks[2][2])
+				cellmask = Colocalization.tomask(image)
+				edgemask = Colocalization.tomask(cellmasks[1][2] .+ cellmasks[2][2])
 				Images.save(joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_$(channel)_cell_mask.tif"), cellmask)
 				Images.save(joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_$(channel)_cell_edge_mask.tif"), edgemask)
 				resulting_images[channel] = image
@@ -1608,15 +1609,15 @@ function process_cell(qpath, channels, outdir, serie, subdir, experiment, z, sel
 				if iszero(image)
 					@warn "Refusing to segment zero image for channel $(channel)"
 					resulting_images[channel] = image
-					push!(cellmasks, (ERGO.aszero(image), ERGO.aszero(image)))
+					push!(cellmasks, (Colocalization.aszero(image), Colocalization.aszero(image)))
 				else
 					@debug "Segmenting $channel "
 					segmented_image, cellmask, edgemask = lowsnrsegment(image, edgeiters=edgeiters)
-					segratio = (sum(cellmask) / sum(ERGO.tomask(image)))
+					segratio = (sum(cellmask) / sum(Colocalization.tomask(image)))
 					if segratio > .99
 						@debug "Segmentation probably failed for channel $channel"
 					end
-					@debug "Segmentation reduce to $(sum(cellmask) / sum(ERGO.tomask(image)))"
+					@debug "Segmentation reduce to $(sum(cellmask) / sum(Colocalization.tomask(image)))"
 					Images.save(joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_$(channel)_cell_mask.tif"), cellmask)
 					Images.save(joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_$(channel)_cell_edge_mask.tif"), edgemask)
 					image = segmented_image
@@ -1641,11 +1642,11 @@ function process_cell(qpath, channels, outdir, serie, subdir, experiment, z, sel
 				R = denoisemd(image, 3)
 				R[R .< 0] .= 0
 				R = Images.N0f8.(R)
-				mask = ERGO.tomask(iterative(R, ImageMorphology.dilate, SQR))
+				mask = Colocalization.tomask(iterative(R, ImageMorphology.dilate, SQR))
 				edge = ⨣(𝛁(mask))
-				edged = ERGO.tomask(iterative(edge, ImageMorphology.dilate, SQR))
+				edged = Colocalization.tomask(iterative(edge, ImageMorphology.dilate, SQR))
 				SF = dropartifacts(ccs, image)
-				ccs = Images.label_components(ERGO.tomask(SF), trues(3,3))
+				ccs = Images.label_components(Colocalization.tomask(SF), trues(3,3))
 			end
 			outf = joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_$(channel)_mask.tif")
 			Images.save(outf, msk)
@@ -1666,8 +1667,8 @@ function computemasks(res, union_mask_c12)
 	_c1mask = res[1][end]
 	_c2mask = res[2][end]
 	_mitomask = res[0][end]
-	_c1prime = ERGO.tomask(Int8.(_c1mask) .+ union_mask_c12)
-	_c2prime = ERGO.tomask(Int8.(_c2mask) .+ union_mask_c12)
+	_c1prime = Colocalization.tomask(Int8.(_c1mask) .+ union_mask_c12)
+	_c2prime = Colocalization.tomask(Int8.(_c2mask) .+ union_mask_c12)
 	tricolor_result_no_union = Images.colorview(Images.RGB, _c1mask, _c2mask, _mitomask)
 	tricolor_result_union = Images.colorview(Images.RGB, _c1prime, _c2prime, _mitomask)
 	return tricolor_result_no_union, tricolor_result_union
@@ -1738,17 +1739,17 @@ end
 """
 function unionmask(mask_1, mask_2)
     _c1_c2_union = Int8.(mask_1) + Int8.(mask_2)  # a ConCom will have a 3 if it shares an intersection
-    _c1_c2_u = ERGO.tomask(_c1_c2_union)
+    _c1_c2_u = Colocalization.tomask(_c1_c2_union)
     _c1_c2_c = Images.label_components(_c1_c2_u, trues(3,3))
     _ind = Images.component_indices(_c1_c2_c)[2:end]
-    _filtered_u = ERGO.aszero(_c1_c2_union)
+    _filtered_u = Colocalization.aszero(_c1_c2_union)
     for _cc in 1:maximum(_c1_c2_c)
         _indx = _ind[_cc]
         if maximum(_c1_c2_union[_indx]) == 2
             _filtered_u[_indx] .= 1
         end
     end
-    return ERGO.tomask(_filtered_u)
+    return Colocalization.tomask(_filtered_u)
 end
 
 """

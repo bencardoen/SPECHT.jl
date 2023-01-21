@@ -7,6 +7,7 @@ version = "0.8.319073"
 [deps]
 ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+Colocalization = "5deedb61-f8ac-43ca-82f0-d70c51e04289"
 Conda = "8f4d0f93-b110-5947-807f-2305c1781a2d"
 Coverage = "a2441757-f6aa-5fb2-8edb-039e3f45d037"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
