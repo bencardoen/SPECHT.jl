@@ -3,8 +3,8 @@ Pkg.activate(".")
 using Images, SPECHT, Plots
 using ImageView
 using Statistics
-using ERGO
 using Glob
+using Colocalization
 
 # Copyright (C) 2018-2022 Ben Cardoen bcardoen@sfu.ca
 #
@@ -73,12 +73,12 @@ labeled_c = label_image(ccs, max.(0.25, 1 .- pc_to_c))
 
 
 
-imshow(SPECHT.tcolors([ fuse_images(GTI, maskoutline(labeled_5)), fuse_images(GTI, maskoutline(labeled_c)), GTI .+ ERGO.tomask(A)]))
+imshow(SPECHT.tcolors([ fuse_images(GTI, maskoutline(labeled_5)), fuse_images(GTI, maskoutline(labeled_c)), GTI .+ Colocalization.tomask(A)]))
 
 ### Find the ROIs
-rois, roibox = to_rois(ERGO.tomask(A), 300)
-Images.save(joinpath(output, "inset.tif"), max.(ERGO.tomask(rois), I))
-roiI, roiA, roiS, roi5, roiC = [slicerois(i, roibox) for i in [I, ERGO.tomask(A), ERGO.tomask(labeled_5 .+ labeled_c), labeled_5, labeled_c]]
+rois, roibox = to_rois(Colocalization.tomask(A), 300)
+Images.save(joinpath(output, "inset.tif"), max.(Colocalization.tomask(rois), I))
+roiI, roiA, roiS, roi5, roiC = [slicerois(i, roibox) for i in [I, Colocalization.tomask(A), Colocalization.tomask(labeled_5 .+ labeled_c), labeled_5, labeled_c]]
 
 ## Save GT
 for RI in 1:length(roiS)
@@ -119,13 +119,13 @@ r=gm(pc3)/gm(mc5)
 
 pc3n = addnoise(pc3./maximum(pc3), 8)
 _ccs, mll = SPECHT.process_tiffimage(pc3n./maximum(pc3n), 0, [0,σ], true, PRC, 0)[1:2];
-cmsk = filtercomponents_using_maxima_IQR(pc3n, ERGO.tomask(_ccs))
+cmsk = filtercomponents_using_maxima_IQR(pc3n, Colocalization.tomask(_ccs))
 nccs=label_components(cmsk)
 fts = getfeatures(pc3n, nccs, rlap(mll))
 
 mc5n = addnoise(mc5./maximum(mc5), 8)
 _ccs, mll = SPECHT.process_tiffimage(mc5n./maximum(mc5n), 0, [0,σ], true, PRC, 0)[1:2];
-cmsk = filtercomponents_using_maxima_IQR(mc5n, ERGO.tomask(_ccs))
+cmsk = filtercomponents_using_maxima_IQR(mc5n, Colocalization.tomask(_ccs))
 n5ccs=label_components(_ccs)
 fts5 = getfeatures(mc5n, n5ccs, rlap(mll))
 
@@ -138,14 +138,14 @@ labeled_cn = label_image(nccs, max.(0.25, 1 .- pcn_to_c))
 
 
 
-GTIN = fuse_max(pc3n, ERGO.tomask(A))
+GTIN = fuse_max(pc3n, Colocalization.tomask(A))
 
-imshow(SPECHT.tcolors([ fuse_images(GTIN, maskoutline(labeled_5n)), fuse_images(GTIN, maskoutline(labeled_cn)), GTIN .+ ERGO.tomask(A)]))
+imshow(SPECHT.tcolors([ fuse_images(GTIN, maskoutline(labeled_5n)), fuse_images(GTIN, maskoutline(labeled_cn)), GTIN .+ Colocalization.tomask(A)]))
 
 ### Find the ROIs
-rois, roibox = to_rois(ERGO.tomask(A), 300)
-Images.save(joinpath(output, "inset.tif"), max.(ERGO.tomask(rois), I))
-roiIn, roiAn, roiSn, roi5n, roiCn = [slicerois(i, roibox) for i in [pc3n, ERGO.tomask(A), ERGO.tomask(labeled_5n .+ labeled_cn), labeled_5n, labeled_cn]]
+rois, roibox = to_rois(Colocalization.tomask(A), 300)
+Images.save(joinpath(output, "inset.tif"), max.(Colocalization.tomask(rois), I))
+roiIn, roiAn, roiSn, roi5n, roiCn = [slicerois(i, roibox) for i in [pc3n, Colocalization.tomask(A), Colocalization.tomask(labeled_5n .+ labeled_cn), labeled_5n, labeled_cn]]
 
 ## Save GT
 for RI in 1:length(roiSn)
@@ -168,8 +168,8 @@ end
 
 ccs, out, ni, cmsks, roiI, roiA, roiS=results[facs[1]]
 
-imshow(SPECHT.tcolors([ni, ERGO.tomask(A), SPECHT.maskoutline(ERGO.tomask(ccs))]))
-imshow(SPECHT.tcolors([ni, ERGO.tomask(A), out]))
+imshow(SPECHT.tcolors([ni, Colocalization.tomask(A), SPECHT.maskoutline(Colocalization.tomask(ccs))]))
+imshow(SPECHT.tcolors([ni, Colocalization.tomask(A), out]))
 
 
 
@@ -255,7 +255,7 @@ function findrect(comp, cc)
 end
 
 function annotate_roi(img, coords, vals)
-    _img = ERGO.aszero(img)
+    _img = Colocalization.aszero(img)
     for (i,coord) in enumerate(coords)
         mx, my = coord[1]
         MX, MY = coord[2]
@@ -272,13 +272,13 @@ function torect(img)
 end
 
 function to_rois(annotation, distance=200)
-	_ccs=label_components(ERGO.tomask(annotation))
+	_ccs=label_components(Colocalization.tomask(annotation))
 	mt = cluster(_ccs)
 	graph = buildGraph(mt, distance)
 	N = maximum(_ccs)
 	CC = connectedComponents(N, graph)
 	rects = [findrect(c, _ccs) for c in CC]
-	ROI=annotate_roi(ERGO.aszero(annotation), rects, [1 for r in rects])
+	ROI=annotate_roi(Colocalization.aszero(annotation), rects, [1 for r in rects])
 	R2=torect(ROI)
 	CRS = label_components(R2)
 	roibox = component_boxes(CRS)[2:end]
@@ -315,7 +315,7 @@ function slicerois(im, boxes, alignto=160)
 	res
 end
 function label_image(cx, px)
-	res = Images.N0f16.(ERGO.aszero(cx))
+	res = Images.N0f16.(Colocalization.aszero(cx))
 	indices = Images.component_indices(cx)[2:end]
 	for (j, ind) in enumerate(indices)
 		res[ind] .= px[j]
