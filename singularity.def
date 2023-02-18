@@ -9,10 +9,10 @@ From: fedora:35
     git clone https://github.com/bencardoen/SPECHT.jl
     wget https://julialang-s3.julialang.org/bin/linux/x64/1.7/julia-1.7.1-linux-x86_64.tar.gz
     mkdir -p /opt/julia
-    mv julia-1.7.1-linux-x86_64.tar.gz /opt/julia
+    mv julia-1.8.5-linux-x86_64.tar.gz /opt/julia
     cd /opt/julia
-    tar -xf julia-1.7.1-linux-x86_64.tar.gz
-    export PATH=/opt/julia/julia-1.7.1/bin:$PATH
+    tar -xf julia-1.8.5-linux-x86_64.tar.gz
+    export PATH=/opt/julia/julia-1.8.5/bin:$PATH
     mkdir -p /opt/juliadepot
     export JULIA_DEPOT_PATH=/opt/juliadepot
     cd /opt/SPECHT.jl
@@ -27,7 +27,7 @@ From: fedora:35
 
 %environment
     export LC_ALL=C
-    export PATH=/opt/julia/julia-1.7.1/bin:$PATH
+    export PATH=/opt/julia/julia-1.8.5/bin:$PATH
     export JULIA_DEPOT_PATH=/opt/juliadepot
 
 %runscript
