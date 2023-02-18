@@ -5,7 +5,7 @@ jobs:
   build:
     working_directory: /root/project/SPECHT.jl   # Clone into a directory whose name matches your Package.
     docker:
-      - image: julia:1.7
+      - image: julia:1.8
     steps:
       - run:
           command: julia -e 'using Pkg; Pkg.add("Coverage"); Pkg.add(url="https://github.com/bencardoen/Colocalization.jl.git"); Pkg.add(url="https://github.com/bencardoen/ERGO.jl.git"); Pkg.add(url="https://github.com/bencardoen/SPECHT.jl.git"); Pkg.test("SPECHT", coverage=true)'
