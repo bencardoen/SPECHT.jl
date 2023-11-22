@@ -1084,6 +1084,11 @@ function process_tiffimage(img, z, sigmas, selfscale, PRC, smooth; selfscalemeth
     i2[ngl .< Tg] .= zero(eltype(img))
     i2[ngl .>= Tg] .= oneunit(eltype(img))
     # Get rid of artifacts on the border
+	if !isnothing(edgemask)
+		@info "Using edgemask"
+		@assert size(edgemask) == size(imgl)
+		i2[edgemask .> 0 ] .= 0
+	end
     i2[1:3,:].=0
     i2[:,1:3].=0
     i2[end-2:end,:].=0
@@ -1592,6 +1597,13 @@ function process_cell(qpath, channels, outdir, serie, subdir, experiment, z, sel
 		# Do segment, then default
 	# if mode == default do default
 	cellmasks = []
+	IMG = images[1] .+ images[2] .+ images[3]
+	CM = Colocalization.tomask(IMG)
+	Images.save(joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_all_cell_mask.tif"), CM)
+	msk = Colocalization.tomask(iterative(CM, ImageMorphology.dilate, SQR))
+	edge = ⨣(𝛁(msk))
+	edged = Colocalization.tomask(iterative(edge, ImageMorphology.dilate, SQR*2))
+	Images.save(joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_all_cell_mask_edges.tif"), Colocalization.tomask(edged))
 	for (channelrev, image) in enumerate(reverse(images))
 		channel = 3 - channelrev # 3->0, 2->1, 1->2
 		edgemask = nothing
@@ -1636,15 +1648,18 @@ function process_cell(qpath, channels, outdir, serie, subdir, experiment, z, sel
 			@debug "Mito image zeroed, skipping processing"
 			res[channel] = (Images.label_components(image), image)
 		else
-			ccs, imgl, Tg, _img, msk = process_tiffimage(image, z, [sigma, sigma], selfscale, PRC, 0, edgemask=edgemask)
+			ccs, imgl, Tg, _img, msk = process_tiffimage(image, z, [sigma, sigma], selfscale, PRC, 0, edgemask=edged)
 			if selfscale
-				@warn "Prototype filtering"
+				@info "Prototype filtering"
 				R = denoisemd(image, 3)
 				R[R .< 0] .= 0
 				R = Images.N0f8.(R)
+				@info SQR
 				mask = Colocalization.tomask(iterative(R, ImageMorphology.dilate, SQR))
 				edge = ⨣(𝛁(mask))
 				edged = Colocalization.tomask(iterative(edge, ImageMorphology.dilate, SQR))
+				# outf = joinpath(outdir, "$(experiment)_serie_$(serie)_celln_$(celln)_channel_$(channel)_edges.tif")
+				# Images.save(outf, edged)
 				SF = dropartifacts(ccs, image)
 				ccs = Images.label_components(Colocalization.tomask(SF), trues(3,3))
 			end
