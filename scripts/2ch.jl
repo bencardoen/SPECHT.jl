@@ -35,19 +35,58 @@ function autophagy(dir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5)
     end
     return msk, edged, images, results
 end
+# p = "/home/bcardoen/storage/parsa/P/test2channel/1/HT CCCP -BaF siAMF/001"
+# msk, ed, ims, results = autophagy(p)
 
-function quantify(results)
+# i1, i2 = ims
+# m1, m2 = results[1][2], results[2][2]
+# object_stats(i1, i2, m1, m2)
+
+
+
+#     c1stats = Colocalization.describe_cc(c1, i1)
+#     c2stats = Colocalization.describe_cc(c2, i2)
+#     # df1 = DataFrame(channel=1, overlap=o12, distance_to_nearest=disc1_c2, area=Images.component_lengths(c1)[2:end], mean=c1stats[:,1], std=c1stats[:,2])
+#     # df2 = DataFrame(channel=2, overlap=o21, distance_to_nearest=disc2_c1, area=Images.component_lengths(c2)[2:end], mean=c2stats[:,1], std=c2stats[:,2])
+#     # return vcat(df1, df2), d1map, d2map
+# # end
+
+# c1 = results[1][1]
+# m1 = results[1][2]
+# c2 = results[2][1]
+# m2 = results[2][1]
+
+# dfx = quantify(results, ims)
+# @info dfx
+# # vcat([dfx]...)
+
+function overlap(cfrom, mto)
+    ov = zeros(maximum(cfrom))
+    for (i,ind) in enumerate(Images.component_indices(cfrom)[2:end])
+        ov[i] = sum(mto[ind])
+    end
+    return ov
+end
+
+function quantify(results, images)
     @info "Quantifying stats"
     c1, m1 = results[1]
     c2, m2 = results[2]
-    N1=maximum(c1)
-    N2=maximum(c2)
     d12= pairwise_distance(c1, m2)
     d21= pairwise_distance(c2, m1)
     a1 = Images.component_lengths(c1)[2:end]
     a2 = Images.component_lengths(c2)[2:end]
-    df1 = DataFrame(distance_to_other=d12, area=a1, channel=1)
-    df2 = DataFrame(distance_to_other=d21, area=a2, channel=2)
+    c1stats = Colocalization.describe_cc(c1, images[1])
+    c2stats = Colocalization.describe_cc(c2, images[2])
+    ov12 = overlap(c1, m2)
+    ov21 = overlap(c2, m1)
+    df1 = DataFrame(distance_to_other=d12, area=a1, mean_intensity=c1stats[:,1], std_intensity=c1stats[:,2], overlap_other=ov12)
+    df1[!, "channel"] .= 1
+    df2 = DataFrame(distance_to_other=d21, area=a2, mean_intensity=c2stats[:,1], std_intensity=c2stats[:,2], overlap_other=ov21)
+    df2[!, "channel"] .= 2
+    # Add overlap
+    # Use function object_stats(i1, i2, context)
+    # Add intensity mean / std
     return vcat(df1, df2)
 end
 
@@ -77,7 +116,7 @@ function process_dir(indir, outdir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5
                     spots_k = results[k][2]
                     Images.save(joinpath(outdir, "Replicate_$(replicate)_Treatment_$(treatment)_Cell_$(cellnumber)_spots_channel_$(k).tif"), spots_k)
                 end
-                dfx= quantify(results)
+                dfx= quantify(results, imgs)
                 dfx[!, "replicate"] .= replicate
                 dfx[!, "cellnumber"] .= cellnumber
                 dfx[!, "treatment"] .= treatment
@@ -85,7 +124,7 @@ function process_dir(indir, outdir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5
             end
         end
     end    
-    DFX = vcat(dfs)
+    DFX = vcat(dfs...)
     CSV.write(joinpath(outdir, "table_spots.csv"), DFX)
 end
 
