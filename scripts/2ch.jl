@@ -74,8 +74,8 @@ function quantify(results, images)
     c2, m2 = results[2]
     @info "Channel 1 to channel 2"
     d12= pairwise_distance(c1, m2)
-    d21= pairwise_distance(c2, m1)
     @info "Channel 2 to channel 1"
+    d21= pairwise_distance(c2, m1)
     a1 = Images.component_lengths(c1)[2:end]
     a2 = Images.component_lengths(c2)[2:end]
     c1stats = Colocalization.describe_cc(c1, images[1])
@@ -127,6 +127,7 @@ function process_dir(indir, outdir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5
         end
     end    
     DFX = vcat(dfs...)
+    @info "Saving tabular results in $(joinpath(outdir, "table_spots.csv"))"
     CSV.write(joinpath(outdir, "table_spots.csv"), DFX)
 end
 
