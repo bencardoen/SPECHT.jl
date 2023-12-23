@@ -72,8 +72,10 @@ function quantify(results, images)
     @info "Quantifying stats"
     c1, m1 = results[1]
     c2, m2 = results[2]
+    @info "Channel 1 to channel 2"
     d12= pairwise_distance(c1, m2)
     d21= pairwise_distance(c2, m1)
+    @info "Channel 2 to channel 1"
     a1 = Images.component_lengths(c1)[2:end]
     a2 = Images.component_lengths(c2)[2:end]
     c1stats = Colocalization.describe_cc(c1, images[1])

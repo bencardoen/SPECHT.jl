@@ -1085,7 +1085,7 @@ function process_tiffimage(img, z, sigmas, selfscale, PRC, smooth; selfscalemeth
     i2[ngl .>= Tg] .= oneunit(eltype(img))
     # Get rid of artifacts on the border
 	if !isnothing(edgemask)
-		@info "Using edgemask"
+		@debug "Using edgemask"
 		@assert size(edgemask) == size(imgl)
 		i2[edgemask .> 0 ] .= 0
 	end
