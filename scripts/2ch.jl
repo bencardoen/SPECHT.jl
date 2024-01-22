@@ -88,17 +88,17 @@ function quantify(results, images)
     return vcat(df1, df2)
 end
 
-function group_data(df, overlap_minimum=0, minimum_size=0)
-    @info "Filtering with minimum overlap $(overlap_minimum) and minimum size $(minimum_size) total number of rows x cols $(size(df))"
-    _df = copy(df)
-    _df = filter(row -> row.area >= minimum_size, _df)
-    grouped_df = groupby(_df, [:cellnumber, :treatment, :channel, :replicate])
-    gdf = combine(grouped_df, nrow .=> :nr_spots)
-    c1c2df = filter(row -> row.channel == 1 && row.overlap_other > overlap_minimum, _df)
-    c12df = combine(groupby(c1c2df, [:cellnumber, :treatment, :channel, :replicate]), nrow .=> :nr_spots)
-    c12df.channel .= 12
-    return vcat(c12df, gdf)
-end
+# function group_data(df, overlap_minimum=0, minimum_size=0)
+#     @info "Filtering with minimum overlap $(overlap_minimum) and minimum size $(minimum_size) total number of rows x cols $(size(df))"
+#     _df = copy(df)
+#     _df = filter(row -> row.area >= minimum_size, _df)
+#     grouped_df = groupby(_df, [:cellnumber, :treatment, :channel, :replicate])
+#     gdf = combine(grouped_df, nrow .=> :nr_spots)
+#     c1c2df = filter(row -> row.channel == 1 && row.overlap_other > overlap_minimum, _df)
+#     c12df = combine(groupby(c1c2df, [:cellnumber, :treatment, :channel, :replicate]), nrow .=> :nr_spots)
+#     c12df.channel .= 12
+#     return vcat(c12df, gdf)
+# end
 
 function pairwise_distance(from_cc, to_mask)
     dismap = Images.distance_transform(Images.feature_transform(Bool.(to_mask)))
@@ -189,7 +189,7 @@ function run()
     end
     ConsoleLogger(stdout, Logging.Info) |> timestamp_logger |> global_logger
     parsed_args = parse_commandline()
-    println("Arugments are:")
+    println("Arguments are:")
     for (arg,val) in parsed_args
         @info "  $arg  =>  $val"
     end

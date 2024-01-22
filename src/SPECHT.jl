@@ -33,7 +33,7 @@ import StatsBase
 using Match
 
 
-export computemahabdistances, computemahabdistances_vector, contrast_x_to_y, rlap, scale, find_th,
+export computemahabdistances, computemahabdistances_vector, contrast_x_to_y, rlap, scale, find_th, group_data,
 checkdir, glg, process_tiffimage, processimg, glg, compute_nl, process_tiff,
 compute_distances_cc_to_mask, quantify_spots_mitophagy_new, qspot, harmonicmean,
 unionmask, meancov, normalize_stat_dist, cantelli, quantify_spots_mitophagy_new,
@@ -180,6 +180,18 @@ function score_masks_visual(gt_mask, pr_mask)
 		end
 	end
 	return fp, tp, fn
+end
+
+function group_data(df, overlap_minimum=0, minimum_size=0)
+    @info "Filtering with minimum overlap $(overlap_minimum) and minimum size $(minimum_size) total number of rows x cols $(size(df))"
+    _df = copy(df)
+    _df = DataFrames.filter(row -> row.area >= minimum_size, _df)
+    grouped_df = DataFrames.groupby(_df, [:cellnumber, :treatment, :channel, :replicate])
+    gdf = DataFrames.combine(grouped_df, DataFrames.nrow .=> :nr_spots)
+    c1c2df = DataFrames.filter(row -> row.channel == 1 && row.overlap_other > overlap_minimum, _df)
+    c12df = DataFrames.combine(DataFrames.groupby(c1c2df, [:cellnumber, :treatment, :channel, :replicate]), DataFrames.nrow .=> :nr_spots)
+    c12df.channel .= 12
+    return vcat(c12df, gdf)
 end
 
 """
