@@ -3,7 +3,6 @@
 using Images, SPECHT, Glob
 using Colocalization
 using Logging
-using ImageView
 using Images, Colors, DataFrames, CSV, Statistics, LinearAlgebra
 import Glob
 using Logging
@@ -86,10 +85,19 @@ function quantify(results, images)
     df1[!, "channel"] .= 1
     df2 = DataFrame(distance_to_other=d21, area=a2, mean_intensity=c2stats[:,1], std_intensity=c2stats[:,2], overlap_other=ov21)
     df2[!, "channel"] .= 2
-    # Add overlap
-    # Use function object_stats(i1, i2, context)
-    # Add intensity mean / std
     return vcat(df1, df2)
+end
+
+function group_data(df, overlap_minimum=0, minimum_size=0)
+    @info "Filtering with minimum overlap $(overlap_minimum) and minimum size $(minimum_size) total number of rows x cols $(size(df))"
+    _df = copy(df)
+    _df = filter(row -> row.area >= minimum_size, _df)
+    grouped_df = groupby(_df, [:cellnumber, :treatment, :channel, :replicate])
+    gdf = combine(grouped_df, nrow .=> :nr_spots)
+    c1c2df = filter(row -> row.channel == 1 && row.overlap_other > overlap_minimum, _df)
+    c12df = combine(groupby(c1c2df, [:cellnumber, :treatment, :channel, :replicate]), nrow .=> :nr_spots)
+    c12df.channel .= 12
+    return vcat(c12df, gdf)
 end
 
 function pairwise_distance(from_cc, to_mask)
@@ -105,7 +113,7 @@ function pairwise_distance(from_cc, to_mask)
     return dis
 end
 
-function process_dir(indir, outdir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5)
+function process_dir(indir, outdir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5, minoverlap=0)
     dfs = []
     for replicate in readdir(indir)
         for treatment in readdir(joinpath(indir, replicate))
@@ -129,6 +137,9 @@ function process_dir(indir, outdir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5
     DFX = vcat(dfs...)
     @info "Saving tabular results in $(joinpath(outdir, "table_spots.csv"))"
     CSV.write(joinpath(outdir, "table_spots.csv"), DFX)
+    @info "Summarizing"
+    DFS = group_data(DFX, minoverlap, SQR)
+    CSV.write(joinpath(outdir, "summarized.csv"), DFS)
 end
 
 
@@ -163,6 +174,10 @@ function parse_commandline()
 			help = "Pattern of channels, default *[1,2].tif to pick up channels 1 and 2"
             arg_type = String
             default = "*[1,2].tif"
+        "--min_overlap"
+			help = "Minimum overlap of objects to be considered to be colocalizing"
+            arg_type = Int64
+            default = 0
     end
     return parse_args(s)
 end
@@ -178,7 +193,7 @@ function run()
     for (arg,val) in parsed_args
         @info "  $arg  =>  $val"
     end
-    process_dir(parsed_args["inpath"], parsed_args["outpath"], parsed_args["zval"], parsed_args["sigma"], parsed_args["pattern"], parsed_args["filterleq"])
+    process_dir(parsed_args["inpath"], parsed_args["outpath"], parsed_args["zval"], parsed_args["sigma"], parsed_args["pattern"], parsed_args["filterleq"], parsed_args["min_overlap"])
 end
 
 run()
