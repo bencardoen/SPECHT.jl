@@ -12,7 +12,7 @@ using LoggingExtras
 using Dates
 using Base.Threads
 
-function autophagy(dir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5)
+function autophagy(dir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5, autotune=false, prc=2.0)
     tifs = Glob.glob(pattern, dir)
     @info "$tifs"
     images = [Images.load(i) for i in tifs]
@@ -27,7 +27,8 @@ function autophagy(dir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5)
 	edged = Colocalization.tomask(iterative(edge, ImageMorphology.dilate, SQR*2))
     results = Dict()
     for (i, image) in enumerate(images)
-        ccs, imgl, Tg, _img, _msk = process_tiffimage(image, z, [sigma, sigma], false, 2, 0, edgemask=edged)
+        ccs, imgl, Tg, _img, _msk = process_tiffimage(image, z, [sigma, sigma], autotune, prc, 0, edgemask=edged)
+        @info Tg
         cmsk = filter_cc_sqr_greater_than(ccs, _img, SQR)
         ccs = Images.label_components(cmsk, trues(3,3))
         results[i] = ccs, cmsk
@@ -113,14 +114,14 @@ function pairwise_distance(from_cc, to_mask)
     return dis
 end
 
-function process_dir(indir, outdir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5, minoverlap=0)
+function process_dir(indir, outdir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5, minoverlap=0, autotune=false, prc=2.0)
     dfs = []
     for replicate in readdir(indir)
         for treatment in readdir(joinpath(indir, replicate))
             for cellnumber in readdir(joinpath(indir, replicate, treatment))
                 @info "Replicate $replicate Treatment $treatment Cell $cellnumber"
                 celldir=joinpath(indir, replicate, treatment, cellnumber)
-                cell, edge, imgs, results = autophagy(celldir, z, sigma, pattern, SQR);
+                cell, edge, imgs, results = autophagy(celldir, z, sigma, pattern, SQR, autotune, prc);
                 Images.save(joinpath(outdir, "Replicate_$(replicate)_Treatment_$(treatment)_Cell_$(cellnumber)_cellmask.tif"), cell)
                 for k in keys(results)
                     spots_k = results[k][2]
@@ -141,9 +142,6 @@ function process_dir(indir, outdir, z=1.75, sigma=3, pattern="*[1,2].tif", SQR=5
     DFS = group_data(DFX, minoverlap, SQR)
     CSV.write(joinpath(outdir, "summarized.csv"), DFS)
 end
-
-
-# process_dir(topdir, outdir)
 
 function parse_commandline()
     s = ArgParseSettings()
@@ -170,6 +168,13 @@ function parse_commandline()
 			help = "σ for LoG smoothing, defaults to 3.0 (use float notation)"
             arg_type = Float64
             default = 3.0
+        "--prc"
+			help = "Precision recall balance, > 1 favors recall. Default 2."
+            arg_type = Float64
+            default = 2.0
+        "--auto-tune"
+            help = "Switch on autotuning. Note, control recal with --prc x"
+            action = :store_true
         "--pattern"
 			help = "Pattern of channels, default *[1,2].tif to pick up channels 1 and 2"
             arg_type = String
@@ -182,6 +187,7 @@ function parse_commandline()
     return parse_args(s)
 end
 
+
 function run()
     date_format = "yyyy-mm-dd HH:MM:SS"
     timestamp_logger(logger) = TransformerLogger(logger) do log
@@ -193,7 +199,7 @@ function run()
     for (arg,val) in parsed_args
         @info "  $arg  =>  $val"
     end
-    process_dir(parsed_args["inpath"], parsed_args["outpath"], parsed_args["zval"], parsed_args["sigma"], parsed_args["pattern"], parsed_args["filterleq"], parsed_args["min_overlap"])
+    process_dir(parsed_args["inpath"], parsed_args["outpath"], parsed_args["zval"], parsed_args["sigma"], parsed_args["pattern"], parsed_args["filterleq"], parsed_args["min_overlap"], parsed_args["auto-tune"], parsed_args["prc"])
 end
 
 run()
