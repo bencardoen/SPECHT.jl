@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  codecov: codecov/codecov@3.0.0
+  codecov: codecov/codecov@4.1.0
 jobs:
   build:
     working_directory: /root/project/SPECHT.jl   # Clone into a directory whose name matches your Package.
@@ -10,4 +10,4 @@ jobs:
       - run:
           command: julia -e 'using Pkg; Pkg.add("Coverage"); Pkg.add(url="https://github.com/bencardoen/Colocalization.jl.git"); Pkg.add(url="https://github.com/bencardoen/ERGO.jl.git"); Pkg.add(url="https://github.com/bencardoen/SPECHT.jl.git"); Pkg.test("SPECHT", coverage=true)'
       - run:
-          command: julia -e 'using Pkg; cd(Pkg.dir("SPECHT")); using Coverage; Codecov.submit(Codecov.process_folder())'
+          command: julia -e 'using Pkg; import SPECHT; joinpath(dirname(pathof(SPECHT)), ".."); using Coverage; Codecov.submit(Codecov.process_folder())'
