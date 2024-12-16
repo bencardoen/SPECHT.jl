@@ -145,7 +145,7 @@ function generate_scenario(X, Y, nbright, ndim; seed=42, σ=3, offset=32, dimfac
 	N2= nbright
 	cv2 = [[sigfactor*σ 0; 0 sigfactor*σ] for _ in 1:N2]
 	if randomsigma
-		cv2 = [[gensigma(sigfactor*σ, variance) 0; 0 gensigma(sigfactor*σ, variance)] for _ in 1:N]
+		cv2 = [[gensigma(sigfactor*σ, variance) 0; 0 gensigma(sigfactor*σ, variance)] for _ in 1:N2]
 	end
 	rs2 = generate_rand_coordinates(X, Y, N2; offset=offset*4)
 	GT2 = coordstogt([rs2[i,:] for i in 1:N2], X, Y)
