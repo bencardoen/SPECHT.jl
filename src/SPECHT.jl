@@ -130,7 +130,7 @@ end
 	Dimfactor controls the brightness factor of bright v dim.
 	Returns the binary mask of GT locations, image, coordinates for bright and dim
 """
-function generate_scenario(X, Y, nbright, ndim; seed=42, σ=3, offset=32, dimfactor=4)
+function generate_scenario(X, Y, nbright, ndim; seed=42, σ=3, offset=32, dimfactor=4, sigfactor=2)
 	if seed != 0
 		Random.seed!(seed)
 	end
@@ -140,7 +140,7 @@ function generate_scenario(X, Y, nbright, ndim; seed=42, σ=3, offset=32, dimfac
 	GT = coordstogt([rs[i,:] for i in 1:N], X, Y)
 	G = fastgaussian2d([rs[i,:] for i in 1:N], cv, X, Y)
 	N2= nbright
-	cv = [[2*σ 0; 0 2*σ] for _ in 1:N2]
+	cv = [[sigfactor*σ 0; 0 sigfactor*σ] for _ in 1:N2]
 	rs2 = generate_rand_coordinates(X, Y, N2; offset=offset*4)
 	GT2 = coordstogt([rs2[i,:] for i in 1:N2], X, Y)
 	G2 = fastgaussian2d([rs2[i,:] for i in 1:N2], cv, X, Y)
