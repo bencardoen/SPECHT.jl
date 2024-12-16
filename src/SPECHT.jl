@@ -161,7 +161,7 @@ end
 
 
 function gensigma(base=1, std=0.1)
-    return rand(Normal(base, std))
+    return rand(Distributions.Normal(base, std))
 end
 
 
