@@ -130,26 +130,39 @@ end
 	Dimfactor controls the brightness factor of bright v dim.
 	Returns the binary mask of GT locations, image, coordinates for bright and dim
 """
-function generate_scenario(X, Y, nbright, ndim; seed=42, σ=3, offset=32, dimfactor=4, sigfactor=2)
+function generate_scenario(X, Y, nbright, ndim; seed=42, σ=3, offset=32, dimfactor=4, sigfactor=2, randomsigma=false, variance=0.1)
 	if seed != 0
 		Random.seed!(seed)
 	end
 	N = ndim
 	cv = [[σ 0; 0 σ] for _ in 1:N]
+	if randomsigma
+		cv = [[gensigma(σ, variance) 0; 0 gensigma(σ, variance)] for _ in 1:N]
+	end
 	rs = generate_rand_coordinates(X, Y, N; offset=offset)
 	GT = coordstogt([rs[i,:] for i in 1:N], X, Y)
 	G = fastgaussian2d([rs[i,:] for i in 1:N], cv, X, Y)
 	N2= nbright
-	cv = [[sigfactor*σ 0; 0 sigfactor*σ] for _ in 1:N2]
+	cv2 = [[sigfactor*σ 0; 0 sigfactor*σ] for _ in 1:N2]
+	if randomsigma
+		cv2 = [[gensigma(sigfactor*σ, variance) 0; 0 gensigma(sigfactor*σ, variance)] for _ in 1:N]
+	end
 	rs2 = generate_rand_coordinates(X, Y, N2; offset=offset*4)
 	GT2 = coordstogt([rs2[i,:] for i in 1:N2], X, Y)
-	G2 = fastgaussian2d([rs2[i,:] for i in 1:N2], cv, X, Y)
+	G2 = fastgaussian2d([rs2[i,:] for i in 1:N2], cv2, X, Y)
 	ground = ERGO.normimg(GT .+ GT2)
 	total = ERGO.normimg(G./dimfactor .+ G2)
-	return ground, total, rs, rs2
+	if randomsigma 
+		return ground, total, rs, rs2, cv, cv2
+	else
+		return ground, total, rs, rs2
+	end
 end
 
 
+function gensigma(base=1, std=0.1)
+    return rand(Normal(base, std))
+end
 
 
 """
